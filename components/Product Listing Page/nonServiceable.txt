@@ -1,0 +1,90 @@
+import { router, useRef } from "expo-router";
+import React from "react";
+import { TouchableOpacity, View, Text } from "react-native";
+import LottieView from "lottie-react-native";
+import { widthPercentageToDP } from "react-native-responsive-screen";
+const NonServiceable = () => {
+  const animation = useRef(null);
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#fff",
+        paddingBottom: 30,
+      }}
+    >
+      <View style={styles.animationContainer}>
+        <LottieView
+          autoPlay
+          ref={animation}
+          style={{
+            // flex: 1,
+            width: widthPercentageToDP("100"),
+            // height: widthPercentageToDP("90"),
+            backgroundColor: "#fff",
+            // borderColor: "#000",
+            // borderWidth: 1,
+          }}
+          // Find more Lottie files at https://lottiefiles.com/featured
+          source={require("../../../../assets/lottiefiles/no_store.json")}
+        />
+      </View>
+
+      {/*  Your cart is empty  */}
+      <View style={{ height: 50, alignItems: "center" }}>
+        <Text
+          style={{
+            color: "#909095",
+            fontWeight: "500",
+            paddingHorizontal: Dimensions.get("screen").width * 0.1,
+            textAlign: "center",
+            // marginBottom: 20,
+            // paddingBottom: 20,
+            fontSize: 16,
+          }}
+        >
+          The store is currently not serviceable in your area
+        </Text>
+      </View>
+
+      {/* Continue Button */}
+      <TouchableOpacity
+        onPress={() => router.push("/address/SavedAddresses")}
+        style={{
+          backgroundColor: "#030303",
+          width: widthPercentageToDP("90"),
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          borderRadius: 50,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "#fff", fontWeight: "600", fontSize: 20 }}>
+          <MaterialCommunityIcons size={20} name="map-marker" />
+          Change Location
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => router.push("/(tabs)/home")}
+        style={{
+          borderColor: "#030303",
+          width: widthPercentageToDP("90"),
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          borderRadius: 50,
+          alignItems: "center",
+          borderWidth: 2,
+          marginVertical: 10,
+        }}
+      >
+        <Text style={{ color: "#030303", fontWeight: "600", fontSize: 20 }}>
+          View other stores
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+export default NonServiceable;
