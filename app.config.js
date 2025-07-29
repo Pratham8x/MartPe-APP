@@ -6,6 +6,9 @@ export default {
     slug: "MartPe",
     main: "expo-router/entry",
     version: "1.0.0",
+    runtimeVersion: {
+    policy: "appVersion" 
+  }, 
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     scheme: "Martpe",
@@ -15,6 +18,7 @@ export default {
       supportsTablet: true
     },
     android: {
+      package: "com.pratham.martpe",
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffff"
@@ -24,14 +28,14 @@ export default {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/favicon.png"
+      favicon: "./assets/favicon.png"
     },
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash-icon.png",
+          image: "./assets/images/icon.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#ffff"
@@ -43,9 +47,12 @@ export default {
     experiments: {
       typedRoutes: true
     },
+    updates: {
+      url: "https://u.expo.dev/b0c3da72-e565-4599-a0b4-4061814f82e4"
+    },
     extra: {
       BACKEND_BASE_URL: process.env.BACKEND_BASE_URL,
-        eas: {
+      eas: {
         projectId: "b0c3da72-e565-4599-a0b4-4061814f82e4"
       }
     }

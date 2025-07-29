@@ -5,8 +5,8 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "clean": "yarn cache clean && expo r -c",
@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
+    "@expo/config-plugins": "~10.1.1",
+    "@expo/plist": "^0.3.5",
+    "@expo/prebuild-config": "~9.0.0",
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5.1.8",
     "@graphql-typed-document-node/core": "^3.2.0",
@@ -30,6 +33,7 @@
     "expo-blur": "~14.1.5",
     "expo-camera": "^16.1.11",
     "expo-constants": "^17.1.7",
+    "expo-dev-client": "^5.2.4",
     "expo-font": "~13.3.2",
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.4.0",
@@ -41,6 +45,7 @@
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.5",
     "expo-system-ui": "~5.0.10",
+    "expo-updates": "~0.28.17",
     "expo-web-browser": "~14.2.0",
     "geolib": "^3.3.4",
     "graphql": "^16.11.0",
@@ -84,13 +89,37 @@
     "@types/react": "~19.0.10",
     "@types/react-dom": "~18.2.25",
     "@types/react-native-vector-icons": "^6.4.18",
+    "eas-cli": "^16.17.3",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
     "metro": "^0.82.0",
-    "metro-config": "^0.81.0",
+    "metro-config": "^0.82.0",
+    "metro-resolver": "^0.82.0",
     "metro-react-native-babel-preset": "0.77.0",
     "typescript": "~5.8.3"
   },
   "private": true,
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@1.22.19",
+  "resolutions": {
+    "@expo/config-plugins": "~10.1.1",
+    "@expo/prebuild-config": "~9.0.0"
+  },  
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-razorpay",
+          "react-native-responsive-screen",
+          "react-native-toast-notifications",
+          "react-native-indicators",
+          "react-native-step-indicator",
+          "react-native-alert-notification",
+          "react-native-slide-to-unlock",
+          "react-native-vector-icons",
+          "rn-slide-button"
+        ],
+        "listUnknownPackages": false
+      }
+    }
+  }
 }
