@@ -1,0 +1,709 @@
+import React, { FC, useEffect } from "react";
+import { View, Text, Dimensions } from "react-native";
+import { useGraphQLQuery } from "../../graphql/queries/useGraphql/useGraphql";
+import Electronics from "./Variants/ElectronicsVariant";
+import { ScrollView } from "react-native-gesture-handler";
+import ElectronicsSecondary from "./Variants/ElectronicsSecondary";
+interface VariantGroupProps {
+  parentId: string;
+  bppId: string;
+  locationId: string;
+  domain: string;
+  cityCode: string;
+  vendorId: string;
+  initialPrimaryVariant: string;
+  initialSecondaryVariant: string;
+  attributes: string;
+  variants: string | string[];
+}
+
+const { width } = Dimensions.get("window");
+
+const VariantGroup: FC<VariantGroupProps> = ({
+  parentId,
+  bppId,
+  locationId,
+  domain,
+  cityCode,
+  vendorId,
+  initialPrimaryVariant,
+  initialSecondaryVariant,
+  variants,
+}) => {
+  const [PrimaryVariant, setPrimaryVariant] = React.useState<string>(
+    initialPrimaryVariant
+  );
+  const [SecondaryVariant, setSecondaryVariant] = React.useState<string>(
+    initialSecondaryVariant
+  );
+  const [isMeasure, setIsMeasure] = React.useState<boolean>(false);
+
+  useEffect(() => {
+    console.log("data", data);
+    console.log("isLoading", initialPrimaryVariant);
+    console.log("variants", variants);
+  });
+
+  const { data, isLoading, error } = useGraphQLQuery(
+    `query GetVariants($vendorId: String!, $parentItemId: String!) {
+      getVariants(vendor_id: $vendorId, parent_item_id: $parentItemId) {
+         attributes
+        id
+        price {
+          maximum_value
+          value
+        }
+        descriptor {
+          images
+        }
+        quantity {
+          available {
+            count
+          }
+          unitized {
+            measure {
+              unit
+              value
+            }
+          }
+        }
+        
+        variants
+        domainName
+      }
+    }`,
+    {
+      vendorId: vendorId,
+      parentItemId: parentId,
+    }
+  );
+
+  useEffect(() => {
+    console.log(
+      "data",
+      data?.getVariants?.map((item) => item?.variants)
+    );
+    if (
+      data?.getVariants[0].variants.find(
+        (item) => item === "item.quantity.unitized.measure"
+      )
+    ) {
+      setIsMeasure(true);
+    }
+  });
+
+  const attributes = data?.getVariants.map((item) => {
+    return JSON.parse(item.attributes);
+  });
+
+  const convertedData = data?.getVariants.map((item) => {
+    return {
+      ...item,
+      attributes: JSON.parse(item?.attributes),
+    };
+  });
+
+  useEffect(() => {
+    console.log("convertedData", convertedData);
+    console.log("attributes", attributes);
+  });
+
+  const handlePrimaryVariant = (primaryVariant: string) => {
+    setPrimaryVariant(primaryVariant);
+    console.log("primaryVariant", primaryVariant);
+  };
+
+  // const uniqueColorVariants = data?.getVariants
+  //   .map((item) => ({ ...item, attributes: JSON.parse(item.attributes) }))
+  //   .filter(
+  //     (item, index, array) =>
+  //       array.findIndex((t) => t.attributes.color === item.attributes.color) ===
+  //       index
+  //   );
+
+  // console.log("uniqueColorVariants", uniqueColorVariants);
+
+  if (isLoading) return null;
+  if (error) return null;
+
+  return (
+    <View>
+      <View
+        style={{
+          backgroundColor: "#fff",
+          flexDirection: "column",
+          justifyContent: "space-between",
+
+          paddingHorizontal: width * 0.05,
+          paddingVertical: width * 0.03,
+          marginHorizontal: width * 0.05,
+          elevation: 5,
+          borderRadius: 10,
+          marginTop: width * 0.05,
+        }}
+      >
+        <Text style={{ fontSize: 16, fontWeight: "500", marginBottom: 10 }}>
+          Available Quantity
+        </Text>
+        <ScrollView horizontal>
+          {data?.getVariants?.map((item, index) => (
+            <Electronics
+              key={index}
+              givePrimaryVariant={handlePrimaryVariant}
+              primaryAttribute={
+                item.quantity.unitized.measure.value +
+                " " +
+                item.quantity.unitized.measure.unit
+              }
+              productId={item.id}
+              image={item.descriptor.images[0]}
+              currentPrice={item.price.value}
+              maximumPrice={item.price.maximum_value}
+              availableQuantity={item.quantity.available.count}
+              primaryVariant={initialPrimaryVariant}
+            />
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* <View
+        style={{
+          backgroundColor: "#fff",
+          flexDirection: "column",
+          justifyContent: "space-between",
+
+          paddingHorizontal: width * 0.05,
+          paddingVertical: width * 0.03,
+          marginHorizontal: width * 0.05,
+          elevation: 5,
+          borderRadius: 4,
+          marginTop: width * 0.05,
+        }}
+      >
+        <Text style={{ fontSize: 16, fontWeight: "500", marginBottom: 10 }}>
+          Sizes Available
+        </Text>
+        {convertedData?.filter((item) => {
+          return item.attributes.color === PrimaryVariant;
+        }).length > 1 ? (
+          <ScrollView horizontal>
+            {convertedData
+              ?.filter((item) => {
+                return item.attributes.color === PrimaryVariant;
+              })
+              .map((item, index) => (
+                <ElectronicsSecondary
+                  key={index}
+                  productId={item.id}
+                  secondaryAttribute={item.attributes.size}
+                  secondaryVariant={SecondaryVariant}
+                />
+              ))}
+          </ScrollView>
+        ) : (
+          <Text>No size variation available</Text>
+        )}
+      </View> */}
+    </View>
+  );
+};
+
+export default VariantGroup;
+
+[
+  {
+    attributes: '{"color":"Black","size":"S"}',
+  },
+  {
+    attributes: '{"color":"blue","size":"S"}',
+  },
+  {
+    attributes: '{"color":"blue","size":"M"}',
+  },
+];
+
+[
+  {
+    id: "5f9e3a5d9e2c6b0012c4b6d0ds",
+    price: { maximum_value: 100, value: 100 },
+    descriptor: { images: [Array] },
+  },
+  {
+    id: "5f9e3a5d9e2c6b0012c4b6d0ds",
+    price: { maximum_value: 100, value: 100 },
+    descriptor: { images: [Array] },
+  },
+  {
+    id: "5f9e3a5d9e2c6b0012c4b6d0ds",
+    price: { maximum_value: 100, value: 100 },
+    descriptor: { images: [Array] },
+  },
+];
+
+
+//
+
+import React, { FC, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+  TextInput,
+  Pressable,
+} from "react-native";
+import { useGraphQLQuery } from "../../graphql/queries/useGraphql/useGraphql";
+import AddToCart from "./AddToCart";
+
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+interface CustomizationGroupProps {
+  customizable: boolean;
+  customGroup: string[] | null;
+  providerId: string;
+  domain: string;
+  cityCode: string;
+  bppId: string;
+  vendorId: string | string[];
+  price: number;
+  itemId: string;
+  maxLimit: number;
+}
+
+const CustomizationGroup: FC<CustomizationGroupProps> = ({
+  customizable,
+  customGroup,
+  vendorId,
+  price,
+  itemId,
+  maxLimit,
+}) => {
+  const [activeCustomGroup, setActiveCustomGroup] = React.useState<string>(
+    customGroup[0]
+  );
+  const [nextCustomGroup, setNextCustomGroup] = React.useState<string>("");
+  const [selectedCustomizations, setSelectedCustomizations] = React.useState<
+    Array<string>
+  >([]);
+
+  const [step, setStep] = React.useState<number>(0);
+  const [selected, setSelected] = React.useState<string>("");
+  const [multipleSelected, setMultipleSelected] = React.useState([]);
+  const [addedSelected, setAddedSelected] = React.useState([]);
+  const { data, isLoading, error } = useGraphQLQuery(
+    `query GetCustomizations($customGroup: [String!]!, $vendorId: String!) {
+      getCustomizations(custom_group: $customGroup, vendor_id: $vendorId) {
+         descriptor {
+                name
+              }
+              options {
+                child {
+                  id
+                }
+                descriptor {
+                  name
+                }
+                price {
+                  value
+                }
+                quantity {
+                  available {
+                    count
+                  }
+                }
+                related
+                type
+                group {
+                  default
+                  id
+                }
+                tags {
+                  code
+                  list {
+                    code
+                    value
+                  }
+                }
+              }
+              custom_group_id
+              config {
+                input
+                max
+                min
+                seq
+              }
+      }
+    }`,
+    {
+      customGroup: customGroup,
+      vendorId: vendorId,
+    }
+  );
+
+  useEffect(() => {
+    setActiveCustomGroup(customGroup[0]);
+    setSelectedCustomizations([]);
+
+    setStep(0);
+    console.log("customizable", customGroup, vendorId, step);
+    console.log(
+      "selectedCustomizations",
+      activeCustomGroup,
+      selectedCustomizations
+    );
+  }, [customGroup]);
+
+  const handleAddCustomization = (
+    activeCustomGroup: string | null,
+    customizationId: string
+  ) => {
+    if (customizationId === null) {
+      setSelectedCustomizations([...selectedCustomizations]);
+    } else {
+      setSelectedCustomizations((selected) => {
+        if (selected.includes(customizationId)) {
+          return selected.filter((id) => id !== customizationId);
+        } else {
+          return [...selected, customizationId];
+        }
+      });
+    }
+
+    if (activeCustomGroup === null) {
+      setNextCustomGroup("end");
+    } else {
+      setNextCustomGroup(activeCustomGroup);
+    }
+  };
+
+  if (customGroup === null) return null;
+  if (isLoading) return <Text>Loading...</Text>;
+  if (error) return <Text>Error</Text>;
+
+  return (
+    <View
+      style={{
+        paddingHorizontal: Dimensions.get("screen").width * 0.03,
+        height: "100%",
+        flex: 1,
+      }}
+    >
+      {customizable ? (
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "600",
+            paddingVertical: Dimensions.get("screen").width * 0.04,
+          }}
+        >
+          Customize as per your taste
+        </Text>
+      ) : (
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "600",
+            paddingVertical: Dimensions.get("screen").width * 0.04,
+          }}
+        >
+          No customizations available
+        </Text>
+      )}
+
+      <View
+        style={{
+          borderBottomColor: "black",
+          borderBottomWidth: 0.2,
+        }}
+      ></View>
+      {data.getCustomizations.map((item, idx) => {
+        return (
+          <View key={idx}>
+            {item.custom_group_id === activeCustomGroup ? (
+              <View>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    paddingVertical: 10,
+                    fontWeight: "500",
+                  }}
+                >
+                  {item.descriptor.name}
+                  {selectedCustomizations}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    paddingVertical: 10,
+                    fontWeight: "400",
+                  }}
+                >
+                  {item.config.input === "text"
+                    ? "Enter your selection"
+                    : item.config.input +
+                      " upto " +
+                      item.config.max +
+                      " option"}
+                </Text>
+                <View
+                  style={{
+                    backgroundColor: "white",
+                    elevation: 2,
+                    shadowColor: "grey",
+                    shadowOffset: { width: 0, height: 2 },
+                    paddingHorizontal: 10,
+                    minHeight: 100,
+                    borderRadius: 10,
+                  }}
+                >
+                  {item.options.map((option, idx) => {
+                    return (
+                      <View key={idx}>
+                        <Pressable
+                          onPress={() => {
+                            // handleAddCustomization(
+                            //   option?.child?.id,
+                            //   option?.group?.id
+                            // );
+                            if (item.config.max > 1) {
+                              setMultipleSelected((currentSelected) => {
+                                // Check if the item is already selected
+                                if (
+                                  currentSelected.includes(
+                                    option.descriptor.name
+                                  ) ||
+                                  multipleSelected.length >= item.config.max
+                                ) {
+                                  // Item is already selected, so remove it from the array
+                                  return currentSelected.filter(
+                                    (name) => name !== option.descriptor.name
+                                  );
+                                } else {
+                                  // Item is not selected, so add it to the array
+                                  return [
+                                    ...currentSelected,
+                                    option.descriptor.name,
+                                  ];
+                                }
+                              });
+                            } else {
+                              setSelected(option.descriptor.name);
+                            }
+                          }}
+                        >
+                          {item.config.input === "text" ? (
+                            <>
+                              <Text>{option.descriptor.name}</Text>
+                              <TextInput
+                                style={{
+                                  borderBottomWidth: 1,
+                                  borderBottomColor: "gray",
+                                }}
+                              />
+                            </>
+                          ) : null}
+                          {item.config.input === "select" &&
+                          item.config.max == 1 ? (
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                width: Dimensions.get("screen").width * 0.88,
+                                justifyContent: "space-between",
+                                marginVertical: 10,
+                              }}
+                            >
+                              <Text>{option.descriptor.name}</Text>
+                              <View
+                                style={{
+                                  width: 16,
+                                  height: 16,
+                                  borderColor:
+                                    selected === option.descriptor.name
+                                      ? "#FB3E44"
+                                      : "#ACAAAA",
+                                  borderWidth: 1.5,
+                                  borderRadius: 15,
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                {selected === option.descriptor.name && (
+                                  <View
+                                    style={{
+                                      width: 8,
+                                      height: 8,
+                                      backgroundColor: "#FB3E44",
+                                      borderRadius: 15,
+                                    }}
+                                  ></View>
+                                )}
+                              </View>
+                            </View>
+                          ) : null}
+                          {item.config.input === "select" &&
+                          item.config.max > 1 ? (
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                width: Dimensions.get("screen").width * 0.88,
+                                justifyContent: "space-between",
+                                marginVertical: 10,
+                              }}
+                            >
+                              <Text>{option.descriptor.name}</Text>
+                              <View
+                                style={{
+                                  width: 16,
+                                  height: 16,
+                                  borderColor: multipleSelected.includes(
+                                    option.descriptor.name
+                                  )
+                                    ? "#FB3E44"
+                                    : "#ACAAAA",
+                                  borderWidth: 1.5,
+                                  borderRadius: 15,
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                {multipleSelected.includes(
+                                  option.descriptor.name
+                                ) && (
+                                  <View
+                                    style={{
+                                      width: 8,
+                                      height: 8,
+                                      backgroundColor: "#FB3E44",
+                                      borderRadius: 15,
+                                    }}
+                                  ></View>
+                                )}
+                              </View>
+                            </View>
+                          ) : null}
+                        </Pressable>
+                      </View>
+                    );
+                  })}
+                </View>
+                <View style={{ marginVertical: "35%" }}>
+                  {item?.options[step]?.child?.id ? (
+                    <View>
+                      {step > 0 && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setActiveCustomGroup(
+                              selectedCustomizations[step - 1]
+                            );
+                            setStep(step - 1);
+                          }}
+                          style={{
+                            backgroundColor: "#FB3E44",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            paddingHorizontal:
+                              Dimensions.get("screen").width * 0.05,
+                            paddingVertical:
+                              Dimensions.get("screen").width * 0.03,
+                            borderRadius: 4,
+                            marginBottom: 10,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: "white",
+                              fontSize: 16,
+                              fontWeight: 600,
+                            }}
+                          >
+                            Previous
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      <TouchableOpacity
+                        onPress={() => {
+                          setActiveCustomGroup(nextCustomGroup);
+                          setAddedSelected([
+                            ...addedSelected,
+                            selectedCustomizations,
+                          ]);
+                          setStep(step + 1);
+                          console.log(addedSelected);
+                        }}
+                        style={{
+                          backgroundColor: "#0e8910",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+
+                          paddingHorizontal:
+                            Dimensions.get("screen").width * 0.05,
+                          paddingVertical:
+                            Dimensions.get("screen").width * 0.03,
+                          borderRadius: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "white",
+                            fontSize: 16,
+                            fontWeight: 600,
+                          }}
+                        >
+                          Next
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <>
+                      {step > 0 && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setActiveCustomGroup(
+                              selectedCustomizations[step - 1]
+                            );
+                            setStep(step - 1);
+                          }}
+                          style={{
+                            backgroundColor: "#FB3E44",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            paddingHorizontal:
+                              Dimensions.get("screen").width * 0.05,
+                            paddingVertical:
+                              Dimensions.get("screen").width * 0.03,
+                            borderRadius: 4,
+                            marginBottom: 10,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: "white",
+                              fontSize: 16,
+                              fontWeight: 600,
+                            }}
+                          >
+                            Previous
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      <AddToCart
+                        price={price}
+                        storeId={vendorId}
+                        itemId={itemId}
+                        maxLimit={maxLimit}
+                      />
+                    </>
+                  )}
+                </View>
+              </View>
+            ) : null}
+          </View>
+        );
+      })}
+    </View>
+  );
+};
+
+export default CustomizationGroup;
