@@ -9,7 +9,7 @@ export default function Layout() {
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
         <Slot />
-        <StatusBar style="auto" />
+        <StatusBar style="dark" />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

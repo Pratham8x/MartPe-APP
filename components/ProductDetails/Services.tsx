@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import React, { FC } from "react";
 import { View, Text, StyleSheet, Dimensions, Pressable } from "react-native";
 import Svg, { Mask, Path, G } from "react-native-svg";
-import useDeliveryStore from "state/deliveryAddressStore";
+import useDeliveryStore from "../../state/deliveryAddressStore";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 

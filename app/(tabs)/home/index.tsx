@@ -4,8 +4,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  View,
-  Text,
 } from "react-native";
 import { router } from "expo-router";
 import * as Location from "expo-location";
@@ -13,7 +11,6 @@ import { Colors } from "../../../theme";
 import Search from "../../../components/common/Search";
 import useDeliveryStore from "../../../state/deliveryAddressStore";
 import { getAddress } from "../../../utility/location";
-import { MaterialIcons } from "@expo/vector-icons";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -50,14 +47,17 @@ const HomeScreen: React.FC = () => {
 
   const getCityName = async (latitude: number, longitude: number): Promise<void> => {
     try {
+      // get address from revgeocode data
       const response = await getAddress(latitude, longitude);
       console.log(
         "rev-geocoded address response:",
         response?.data?.items[0]?.address
       );
 
+      // process revgeocode data for address
       const address = response?.data?.items[0]?.address;
 
+      // set the global state
       addDeliveryDetail({
         addressId: null,
         city: address?.city || null,
@@ -103,12 +103,11 @@ const HomeScreen: React.FC = () => {
       <TouchableOpacity
         onPress={() => router.push("../../search")}
         style={styles.headerContainer}
-        activeOpacity={0.7}
       >
-        <View style={styles.searchContainer}>
-          <MaterialIcons name="search" size={24} color={Colors.PRIMARY_COLOR} />
-          <Text style={styles.searchPlaceholder}>Search for items or stores</Text>
-        </View>
+        <Search
+          showBackArrow={false}
+          placeholder="Search for items or stores"
+        />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -120,35 +119,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.WHITE_COLOR,
   },
   headerContainer: {
-    backgroundColor: Colors.WHITE_COLOR,
-    paddingHorizontal: 15,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    flexDirection: "row",
     paddingVertical: 10,
-    marginHorizontal: 15,
-    marginTop: 10,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.LIGHT_GRAY_COLOR,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    width: '100%',
-  },
-  searchPlaceholder: {
-    flex: 1,
-    marginLeft: 8,
-    fontSize: 16,
-    color: Colors.GRAY_COLOR,
+    marginHorizontal: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f8f9fa",
   },
 });
 

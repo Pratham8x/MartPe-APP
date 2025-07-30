@@ -1,4 +1,4 @@
-import LikeButton from "components/common/likeButton";
+import LikeButton from "../../components/common/likeButton";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Pressable,
 } from "react-native";
-import { useCartStore } from "state/useCartStore";
+import { useCartStore } from "../../state/useCartStore";
 
 const ProductList = ({ storeId, catalogs, categoryFiltered }) => {
   const allCarts = useCartStore((state) => state.allCarts);

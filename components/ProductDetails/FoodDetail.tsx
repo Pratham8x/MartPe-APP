@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from "react";
 import { View, Text } from "react-native";
 import ImageComp from "../common/ImageComp";
-import { useGraphQLQuery } from "../../graphql/queries/useGraphql/useGraphql";
+import { useGraphQLQuery } from "../../gql/queries/useGraphql/useGraphql";
 interface Props {
   productId: string;
 }

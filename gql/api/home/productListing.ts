@@ -1,5 +1,5 @@
-import { getHeaders, graphqlClient } from "clients/api";
-import { getVendorByIdQuery } from "graphql/queries/vendor";
+import { getHeaders, graphqlClient } from "../../../clients/api";
+import { getVendorByIdQuery } from "../../../gql/queries/vendor";
 
 export const getVendorById = async (params: any) => {
   const headers = await getHeaders();

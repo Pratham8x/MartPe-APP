@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, Image, Text, Pressable } from "react-native";
 import ProductList2 from "./ProductList2";
 import { router } from "expo-router";
-import LikeButton from "components/common/likeButton";
+import LikeButton from "../../components/common/likeButton";
 
 const StoreCard3 = ({ storeData, color, categoryFiltered }) => {
   if (!storeData) {

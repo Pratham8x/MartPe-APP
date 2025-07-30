@@ -24,7 +24,7 @@ const FashionCard: FC<FashionCardProps> = ({
   return (
     <Pressable
       onPress={() => {
-        router.push(`/(tabs)/home/productDetails/${id}`);
+        router.push(`../(tabs)/home/productDetails/${id}`);
       }}
       style={styles.fashionCard}
     >

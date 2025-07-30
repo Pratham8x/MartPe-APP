@@ -65,7 +65,7 @@ const GroceryCardContainer: React.FC<GroceryCardContainerProps> = ({
             <Pressable
               key={name}
               onPress={() => {
-                router.push(`/(tabs)/home/productDetails/${item.id}`);
+                router.push(`../(tabs)/home/productDetails/${item.id}`);
               }}
             >
               <GroceryCard

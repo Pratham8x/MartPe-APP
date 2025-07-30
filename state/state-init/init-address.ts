@@ -1,5 +1,5 @@
-import { getAllAddresses } from "graphql/api/user";
-import getCityInfo from "constants/cityCode";
+import { getAllAddresses } from "../../gql/api/user";
+import getCityInfo from "../../constants/cityCode";
 import { get } from "http";
 type AddDeliveryDetailCallback = (address: Address) => void;
 

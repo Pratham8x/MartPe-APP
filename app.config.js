@@ -3,7 +3,7 @@ import 'dotenv/config';
 export default {
   expo: {
     name: "MartPe",
-    slug: "MartPe",
+    slug: "martpe-test",
     main: "expo-router/entry",
     version: "1.0.0",
     runtimeVersion: {
@@ -47,13 +47,15 @@ export default {
     experiments: {
       typedRoutes: true
     },
+        "owner": "martpe",
+
     updates: {
       url: "https://u.expo.dev/b0c3da72-e565-4599-a0b4-4061814f82e4"
     },
     extra: {
       BACKEND_BASE_URL: process.env.BACKEND_BASE_URL,
       eas: {
-        projectId: "b0c3da72-e565-4599-a0b4-4061814f82e4"
+        projectId: "d8115f56-a38f-47e7-b266-4d8c5d659833"
       }
     }
   }

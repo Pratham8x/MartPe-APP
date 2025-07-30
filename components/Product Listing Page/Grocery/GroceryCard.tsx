@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import DynamicButton from "../../common/DynamicButton";
-import { useCartStore } from "state/useCartStore";
+import { useCartStore } from "../../../state/useCartStore";
 import { FontAwesome } from "@expo/vector-icons";
-import { DecrementIcon, IncrementIcon } from "constants/icons/carticons";
+import { DecrementIcon, IncrementIcon } from "../../../constants/icons/carticons";
 import { Dimensions } from "react-native";
 
 interface GroceryCardProps {

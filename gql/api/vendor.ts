@@ -1,5 +1,5 @@
-import { graphqlClient, getHeaders } from "clients/api";
-import { getVendorByIdQuery } from "graphql/queries/vendor";
+import { graphqlClient, getHeaders } from "../../clients/api";
+import { getVendorByIdQuery } from "../../gql/queries/vendor";
 // import { useQuery } from "@tanstack/react-query";
 
 export const getVendorById = async (params: any) => {

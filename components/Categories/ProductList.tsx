@@ -8,7 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import DynamicButton from "../common/DynamicButton";
-import { useCartStore } from "state/useCartStore";
+import { useCartStore } from "../../state/useCartStore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface Descriptor {

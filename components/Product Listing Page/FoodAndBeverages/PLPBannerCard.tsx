@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import PLPBannerAddressDropdown from "./PLPBannerAddressDropdown";
-import useDeliveryStore from "state/deliveryAddressStore";
+import useDeliveryStore from "../../../state/deliveryAddressStore";
 import { router } from "expo-router";
 import {
   FontAwesome,
@@ -16,8 +16,8 @@ import {
   MaterialIcons,
   Ionicons,
 } from "@expo/vector-icons";
-import LikeButton from "components/common/likeButton";
-import ShareButton from "components/common/Share";
+import LikeButton from "../../../components/common/likeButton";
+import ShareButton from "../../../components/common/Share";
 
 interface PLPBannerCardProps {
   title: string;

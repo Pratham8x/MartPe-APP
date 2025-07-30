@@ -8,9 +8,9 @@ import {
   Share,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFavoriteStore } from "state/useFavoriteStore";
-import ShareButton from "components/common/Share";
-import LikeButton from "components/common/likeButton";
+import { useFavoriteStore } from "../../state/useFavoriteStore";
+import ShareButton from "../../components/common/Share";
+import LikeButton from "../../components/common/likeButton";
 interface ProductHeaderProps {
   itemName: string;
   category: string;

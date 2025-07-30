@@ -24,7 +24,7 @@ const SearchboxDropdownItem: React.FC<SearchboxDropdownItemProps> = ({
 }) => {
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/(tabs)/home/productDetails/${item.id}`)}
+      onPress={() => router.push(`../(tabs)/home/productDetails/${item.id}`)}
       style={styles.dropdownItemContainer}
     >
       <View style={styles.dropdownItem}>
@@ -32,7 +32,7 @@ const SearchboxDropdownItem: React.FC<SearchboxDropdownItemProps> = ({
         <Text style={styles.itemName}>{item.name}</Text>
       </View>
       <Image
-        source={require("../../../assets/upRightArrow.png")}
+        //source={require("../../../assets/upRightArrow.png")}
         style={styles.linkIcon}
       />
     </TouchableOpacity>

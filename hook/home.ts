@@ -1,5 +1,5 @@
-import { graphqlClient } from "clients/api";
-import { getHomeQuery } from "graphql/queries/home";
+import { graphqlClient } from "../clients/api";
+import { getHomeQuery } from "../gql/queries/home";
 import { useQuery } from "@tanstack/react-query";
 
 export const useHome = (params: any) => {

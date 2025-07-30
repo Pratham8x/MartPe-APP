@@ -4,7 +4,7 @@ import PLPBannerCard from "./PLPBannerCard";
 import { getDistance } from "geolib";
 import { router } from "expo-router";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import useDeliveryStore from "state/deliveryAddressStore";
+import useDeliveryStore from "../../../state/deliveryAddressStore";
 import { LinearGradient } from "expo-linear-gradient";
 
 interface Point {

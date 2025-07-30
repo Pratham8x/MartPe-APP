@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from "react";
 import { View, Text, Dimensions } from "react-native";
-import { useGraphQLQuery } from "../../graphql/queries/useGraphql/useGraphql";
+import { useGraphQLQuery } from "../../gql/queries/useGraphql/useGraphql";
 import Electronics from "./Variants/ElectronicsVariant";
 import { ScrollView } from "react-native-gesture-handler";
 import ElectronicsSecondary from "./Variants/ElectronicsSecondary";
