@@ -71,13 +71,13 @@ const FilterCard: FC<FilterCardProps> = ({
                   alignItems: "center",
                   paddingVertical: Dimensions.get("screen").width * 0.04,
                   backgroundColor:
-                    activeOption == option.name ? "#F13A3A" : "white",
+                    activeOption === option.name ? "#F13A3A" : "white",
                 }}
               >
                 <Text
                   style={{
                     paddingHorizontal: Dimensions.get("screen").width * 0.05,
-                    color: activeOption == option.name ? "white" : "black",
+                    color: activeOption === option.name ? "white" : "black",
                     fontWeight: "500",
                   }}
                 >

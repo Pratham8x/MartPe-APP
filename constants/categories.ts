@@ -1,7 +1,7 @@
 export const categoryData = [
   {
     id: 1,
-    name: "Food & Beverage",
+    name: "Food",
     link: "Food",
     image:
       "https://res.cloudinary.com/doex3braa/image/upload/v1703051321/martpe/category/gfwgupd0gkmn2dc7euj7.png",

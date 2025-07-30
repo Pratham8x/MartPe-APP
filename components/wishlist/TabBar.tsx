@@ -1,6 +1,5 @@
 import React, { FC, useState } from "react";
 import {
-  Pressable,
   View,
   Text,
   Dimensions,
@@ -8,6 +7,7 @@ import {
 } from "react-native";
 
 const { width } = Dimensions.get("window");
+
 const tabOptions = [
   {
     id: 1,
@@ -19,24 +19,28 @@ const tabOptions = [
   },
 ];
 
+// Define a type for tabs
+export type WishlistTab = "Items" | "Outlets";
+
 interface TabBarProps {
-  selectTab: (tab: string) => void;
+  selectTab: React.Dispatch<React.SetStateAction<WishlistTab>>;
 }
 
 const TabBar: FC<TabBarProps> = ({ selectTab }) => {
-  const [selectedTab, setSelectedTab] = useState("Items");
-  const handleTab = (tab: string) => {
+  const [selectedTab, setSelectedTab] = useState<WishlistTab>("Items");
+
+  const handleTab = (tab: WishlistTab) => {
     setSelectedTab(tab);
     selectTab(tab);
   };
+
   return (
     <View
       style={{
-        width: width,
+        width,
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        // backgroundColor: "gray",
       }}
     >
       <View
@@ -45,24 +49,21 @@ const TabBar: FC<TabBarProps> = ({ selectTab }) => {
           flexDirection: "row",
           justifyContent: "space-around",
           alignItems: "center",
-
           paddingVertical: 10,
           borderRadius: 50,
-          // borderWidth: 1,
-          // borderColor: "#FF5151",
           backgroundColor: "rgba(255, 81, 81, 0.15)",
         }}
       >
         {tabOptions.map((tab) => (
           <TouchableOpacity
+            key={tab.id}
             style={{
               backgroundColor: selectedTab === tab.title ? "#FF5151" : "white",
-              paddingHorizontal: Dimensions.get("screen").width * 0.07,
+              paddingHorizontal: width * 0.07,
               paddingVertical: 10,
               borderRadius: 50,
             }}
-            onPress={() => handleTab(tab.title)}
-            key={tab.id}
+            onPress={() => handleTab(tab.title as WishlistTab)}
           >
             <Text
               style={{

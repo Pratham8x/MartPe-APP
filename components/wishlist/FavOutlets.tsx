@@ -47,7 +47,7 @@ const FavOutlets: FC<FavOutletsProps> = ({ itemsData }) => {
           >
             <View>
               <ImageComp
-                source={{ uri: store?.descriptor?.symbol }}
+                source={ store?.descriptor?.symbol }
                 imageStyle={{
                   aspectRatio: 1,
                   height: 60,

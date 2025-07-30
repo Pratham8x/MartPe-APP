@@ -41,9 +41,7 @@ const FavItems: FC<FavItemsProps> = ({ itemsData }) => {
             }}
           >
             <ImageComp
-              source={{
-                uri: item.descriptor.images[0],
-              }}
+              source={item.descriptor.images[0]}
               imageStyle={{
                 minHeight: Dimensions.get("screen").width * 0.25,
                 // aspectRatio: 1,
