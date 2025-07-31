@@ -29,6 +29,69 @@ import { useHideTabBarStore } from "../../../../state/hideTabBar";
 import { filters, offerData, deliveryData } from "../../../../constants/filters";
 import FoodDetailsComponent from "../../../../components/ProductDetails/FoodDetails";
 
+// Type definitions
+interface FilterSelected {
+  category: string[];
+  offers: number;
+  delivery: number;
+}
+
+interface FoodDetails {
+  images: string;
+  long_desc: string;
+  name: string;
+  short_desc: string;
+  symbol: string;
+  price: string;
+  storeId: string;
+  maxQuantity: number;
+  itemId: string;
+  visible: boolean;
+  maxPrice: number;
+  discount: number;
+}
+
+interface CategoryOption {
+  id: number;
+  label: string;
+  value: string;
+}
+
+interface Catalog {
+  category_id: string;
+  [key: string]: any; // Allow additional catalog properties
+}
+
+interface CalculatedMaxOffer {
+  percent: number;
+  [key: string]: any; // Allow additional offer properties
+}
+
+interface TimeToShip {
+  avg: number;
+  [key: string]: any; // Allow additional time properties
+}
+
+// Use a more flexible approach for store data
+interface StoreData {
+  id?: string | number; // Make id optional and allow string or number
+  [key: string]: any; // Allow any additional properties from API
+}
+
+// If you know the exact structure expected by StoreCard4, use this instead:
+interface StoreCardProps {
+  id: string;
+  name?: string;
+  description?: string;
+  image?: string;
+  location?: any;
+  rating?: number;
+  catalogs?: Catalog[];
+  calculated_max_offer?: CalculatedMaxOffer;
+  time_to_ship_in_hours?: TimeToShip;
+  [key: string]: any;
+}
+
 const domain = "ONDC:RET11";
 const screenWidth = Dimensions.get("window").width;
 
@@ -36,12 +99,12 @@ function Food() {
   const [isFilterVisible, setIsFilterVisible] = useState(false);
 
   const setHideTabBar = useHideTabBarStore((state) => state.setHideTabBar);
-  const [filterSelected, setFilterSelected] = useState({
+  const [filterSelected, setFilterSelected] = useState<FilterSelected>({
     category: [],
     offers: 0,
     delivery: 100,
   });
-  const [foodDetails, setFoodDetails] = useState({
+  const [foodDetails, setFoodDetails] = useState<FoodDetails>({
     images: "",
     long_desc: "",
     name: "",
@@ -56,8 +119,8 @@ function Food() {
     discount: 0,
   });
   const containerHeight = 200;
-  const [storesData, setStoresData] = useState([]);
-  const [offersData, setOffersData] = useState([]);
+  const [storesData, setStoresData] = useState<any[]>([]);
+  const [offersData, setOffersData] = useState<any[]>([]);
   const [activeFilter, setActiveFilter] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [bottonSheetIndex, setBottonSheetIndex] = useState(-1);
@@ -84,6 +147,8 @@ function Food() {
 
   const handleClosePress = () => {
     bottomSheetRef.current?.close();
+    setIsFilterVisible(false);
+    setFoodDetails(prev => ({ ...prev, visible: true }));
   };
   
   const handleOpenPress = () => {
@@ -118,7 +183,7 @@ function Food() {
         const { stores, offers } = data || {};
         
         if (stores) {
-          const filteredStores = stores.filter(
+          const filteredStores: any[] = stores.filter(
             (obj: any) => Object.keys(obj).length > 0
           );
           setStoresData(filteredStores);
@@ -144,12 +209,12 @@ function Food() {
   const allCatalogs = storesData?.flatMap((store: any) => store?.catalogs || []) || [];
 
   // Extract unique category_id values
-  const uniqueCategoryIds = Array.from(
-    new Set(allCatalogs?.map((catalog: any) => catalog?.category_id).filter(Boolean))
+  const uniqueCategoryIds: CategoryOption[] = Array.from(
+    new Set(allCatalogs?.map((catalog: Catalog) => catalog?.category_id).filter(Boolean))
   ).map((category_id, index) => ({
     id: index + 1,
-    label: category_id,
-    value: category_id,
+    label: category_id as string,
+    value: category_id as string,
   }));
 
   const renderSubCategories = () => {
@@ -195,7 +260,8 @@ function Food() {
     
     const meetsOfferCriteria =
       filterSelected.offers === 0 ||
-      (store.calculated_max_offer?.percent >= filterSelected.offers);
+      (store.calculated_max_offer?.percent !== undefined && 
+       store.calculated_max_offer.percent >= filterSelected.offers);
     
     const meetsDeliveryCriteria =
       filterSelected.delivery === 100 ||
@@ -408,10 +474,10 @@ function Food() {
               backgroundColor: "#f8f9fa",
             }}
           >
-            {filteredStores.map((storeData, index) => (
+            {filteredStores.map((storeData: any, index: number) => (
               <StoreCard4
                 categoryFiltered={filterSelected?.category}
-                key={storeData?.id}
+                key={storeData?.id || index}
                 storeData={storeData}
                 foodDetails={setFoodDetails}
                 handleOpenPress={handleOpenPress}
@@ -449,7 +515,10 @@ function Food() {
           />
         )}
         {foodDetails?.visible && (
-          <FoodDetailsComponent foodDetails={foodDetails} />
+          <FoodDetailsComponent 
+            foodDetails={foodDetails} 
+            closeFilter={handleClosePress}
+          />
         )}
       </BottomSheet>
     </View>

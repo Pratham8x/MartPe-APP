@@ -16,7 +16,18 @@ import Carousel from "react-native-reanimated-carousel";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 
-const ProductList3 = ({
+
+interface ProductList3Props {
+  storeId: string;
+  catalogs: any[]; // Replace with real structure or use `any[]` temporarily
+  handleOpenPress: () => void;
+  categoryFiltered: string[]; // or `number[]`, based on category_id type
+  foodDetails: (details: any) => void; // Ideally type this instead of `any`
+  index: number;
+  item :any
+}
+
+const ProductList3: React.FC<ProductList3Props> = ({
   storeId,
   catalogs,
   handleOpenPress,
@@ -65,7 +76,9 @@ const ProductList3 = ({
       categoryFiltered.includes(catalog.category_id)
   );
 
-  const renderProduct = ({ item }) => {
+const renderProduct = ({ item }: { item: any }) => {
+  // your code
+
     return (
       <TouchableOpacity
         onPress={() => {

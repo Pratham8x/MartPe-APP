@@ -3,7 +3,7 @@ import ImageComp from "../../components/common/ImageComp";
 import React, { FC } from "react";
 import { View, Text, Dimensions, StyleSheet, Pressable } from "react-native";
 import AddToCart from "./AddToCart";
-import { FontAwesome, AntDesign } from "react-native-vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import LikeButton from "../../components/common/likeButton";
 interface FoodDetailsProps {
   foodDetails: {
@@ -30,11 +30,9 @@ const FoodDetailsComponent: FC<FoodDetailsProps> = ({
   return (
     <View style={styles.contentContainer}>
       <ImageComp
-        source={{
-          uri:
+        source={
             (foodDetails?.images && foodDetails.images[0]) ||
-            "https://www.foodiesfeed.com/wp-content/uploads/2019/04/mae-mu-oranges-ice-915x1372.jpg",
-        }}
+            "https://www.foodiesfeed.com/wp-content/uploads/2019/04/mae-mu-oranges-ice-915x1372.jpg"}
         imageStyle={{
           height: Dimensions.get("screen").height * 0.3,
           width: Dimensions.get("screen").width * 0.9,

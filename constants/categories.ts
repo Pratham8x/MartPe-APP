@@ -178,7 +178,7 @@ export const homeAndDecorCategoryData = [
   },
   {
     id: 4,
-    name: "Storage & Organisation",
+    name: "Storage & Organization",
     image:
       "https://res.cloudinary.com/doex3braa/image/upload/v1703056639/martpe/home%20and%20decor/qawvm116jkebneyljaty.png",
   },

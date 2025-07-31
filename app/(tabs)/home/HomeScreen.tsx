@@ -11,17 +11,27 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import {
   categoryData,
   getCategoryBackground,
   getCategoryColor,
+  foodCategoryData,
+  groceriesCategoryData,
+  fashionCategoryData,
+  personalCareCategoryData,
+  electronicsCategoryData,
+  homeAndDecorCategoryData,
 } from "../../../constants/categories";
 import * as Location from "expo-location";
-import { Ionicons, Entypo } from "@expo/vector-icons";
+import { Ionicons, Entypo, FontAwesome6 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import useDeliveryStore from "../../../state/deliveryAddressStore";
 import { getAddress } from "../../../utility/location";
+
+const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -139,8 +149,78 @@ const HomeScreen = () => {
   }, [location]);
 
   const handleLocationPress = () => {
-    router.push("../../address/SavedAddresses");
+    router.push("../address/SavedAddresses");
   };
+
+  // Render functions for category sections
+  const renderFoodCategories = ({ item, index }) => {
+    if (index % 2 !== 0) return null;
+    const nextItem = foodCategoryData[index + 1];
+
+    return (
+      <View style={styles.categoryRow}>
+        <TouchableOpacity
+          onPress={() => router.push(`/(tabs)/home/result/${item.name}`)}
+          style={styles.categoryItem}
+        >
+          <Image source={{ uri: item.image }} style={styles.categoryImage} />
+          <Text style={styles.categoryName}>{item.name}</Text>
+        </TouchableOpacity>
+        {nextItem && (
+          <TouchableOpacity
+            onPress={() => router.push(`/(tabs)/home/result/${nextItem.name}`)}
+            style={styles.categoryItem}
+          >
+            <Image source={{ uri: nextItem.image }} style={styles.categoryImage} />
+            <Text style={styles.categoryName}>{nextItem.name}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  const renderGroceryCategories = ({ item, index }) => {
+    if (index % 2 !== 0) return null;
+    const nextItem = groceriesCategoryData[index + 1];
+
+    return (
+      <View style={styles.categoryRow}>
+        <TouchableOpacity
+          onPress={() => router.push(`/(tabs)/home/result/${item.name}`)}
+          style={styles.categoryItem}
+        >
+          <Image source={{ uri: item.image }} style={styles.categoryImage} />
+          <Text style={styles.categoryName}>{item.name}</Text>
+        </TouchableOpacity>
+        {nextItem && (
+          <TouchableOpacity
+            onPress={() => router.push(`/(tabs)/home/result/${nextItem.name}`)}
+            style={styles.categoryItem}
+          >
+            <Image source={{ uri: nextItem.image }} style={styles.categoryImage} />
+            <Text style={styles.categoryName}>{nextItem.name}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  const renderOfferCard = () => (
+    <View style={styles.offerSection}>
+      <View style={styles.offerCard}>
+        <View style={styles.offerContent}>
+          <Text style={styles.offerTitle}>🎉 Special Offers</Text>
+          <Text style={styles.offerSubtext}>Get up to 50% off on selected items</Text>
+          <TouchableOpacity style={styles.offerButton}>
+            <Text style={styles.offerButtonText}>Explore Deals</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.offerImageContainer}>
+          <Text style={styles.offerEmoji}>🛒</Text>
+        </View>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -228,6 +308,7 @@ const HomeScreen = () => {
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.menuItem, styles.menuItemBorder]}
+                        onPress={() => router.push("../../(aux)/privacy-policy")}
                       >
                         <Text style={styles.menuText}>Privacy Policy</Text>
                       </TouchableOpacity>
@@ -236,7 +317,9 @@ const HomeScreen = () => {
                       >
                         <Text style={styles.menuText}>Contact Us</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.menuItem}>
+                      <TouchableOpacity style={styles.menuItem}
+                        onPress={() => router.push("../../(aux)/terms-and-conditions")}
+                        >
                         <Text style={styles.menuText}>Terms & Conditions</Text>
                       </TouchableOpacity>
                     </>
@@ -251,8 +334,8 @@ const HomeScreen = () => {
             style={styles.locationRow}
             onPress={handleLocationPress}
           >
-            <Ionicons
-              name="location-sharp"
+            <FontAwesome6
+              name="location-pin-lock"
               size={18}
               color="white"
               style={{ marginRight: 16 }}
@@ -299,7 +382,7 @@ const HomeScreen = () => {
               return (
                 <TouchableOpacity
                   style={styles.catCard}
-                  onPress={() => router.push(`../categories/${item.link}`)}
+                  onPress={() => router.push(`./categories/${item.link}`)}
                 >
                   <View style={[styles.iconWrapper, { backgroundColor: bg }]}>
                     <Image
@@ -318,11 +401,216 @@ const HomeScreen = () => {
 
         {/* White Content Section */}
         <View style={styles.whiteSection}>
-          {/* This is where other content would go */}
-          <Text style={styles.sectionTitle}>Featured Content</Text>
-          <Text style={styles.sectionSubtext}>
-            More content will be added here
-          </Text>
+          {/* Offer Cards Section */}
+          {renderOfferCard()}
+
+          {/* Quick Access Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Quick Access</Text>
+              <TouchableOpacity>
+                <Text style={styles.seeAllText}>See all</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.quickAccessGrid}>
+              <TouchableOpacity style={styles.quickAccessItem}>
+                <View style={styles.quickAccessIcon}>
+                  <Ionicons name="flash" size={24} color="#ff3c41" />
+                </View>
+                <Text style={styles.quickAccessText}>Flash Sale</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.quickAccessItem}>
+                <View style={styles.quickAccessIcon}>
+                  <Ionicons name="gift" size={24} color="#ff3c41" />
+                </View>
+                <Text style={styles.quickAccessText}>Coupons</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.quickAccessItem}>
+                <View style={styles.quickAccessIcon}>
+                  <Ionicons name="heart" size={24} color="#ff3c41" />
+                </View>
+                <Text style={styles.quickAccessText}>Wishlist</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.quickAccessItem}>
+                <View style={styles.quickAccessIcon}>
+                  <Ionicons name="time" size={24} color="#ff3c41" />
+                </View>
+                <Text style={styles.quickAccessText}>Orders</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Trending Near You Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Trending Near You</Text>
+  
+            </View>
+            {/* <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.trendingContainer}>
+                {[1, 2, 3, 4].map((item, index) => (
+                  <TouchableOpacity key={index} style={styles.trendingCard}>
+                    <View style={styles.trendingImagePlaceholder}>
+                      <Text style={styles.trendingEmoji}>🍕</Text>
+                    </View>
+                    <Text style={styles.trendingTitle}>Popular Restaurant</Text>
+                    <Text style={styles.trendingSubtitle}>2.5 km away</Text>
+                    <View style={styles.ratingContainer}>
+                      <Ionicons name="star" size={12} color="#FFD700" />
+                      <Text style={styles.ratingText}>4.5</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView> */}
+          </View>
+
+          {/* Explore Categories Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderWithLine}>
+              <View style={styles.headerLine} />
+              <Text style={styles.sectionTitleCentered}>Explore Food Categories</Text>
+              <View style={styles.headerLine} />
+            </View>
+            <FlatList
+              data={foodCategoryData}
+              renderItem={renderFoodCategories}
+              keyExtractor={(item) => item.id.toString()}
+              horizontal
+              snapToAlignment="start"
+              snapToInterval={windowWidth / 2}
+              decelerationRate="fast"
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryList}
+            />
+          </View>
+
+          {/* Grocery Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderWithLine}>
+              <View style={styles.headerLine} />
+              <Text style={styles.sectionTitleCentered}>Fresh Groceries</Text>
+              <View style={styles.headerLine} />
+            </View>
+            <FlatList
+              data={groceriesCategoryData}
+              renderItem={renderGroceryCategories}
+              keyExtractor={(item) => item.id.toString()}
+              horizontal
+              snapToAlignment="start"
+              snapToInterval={windowWidth / 2}
+              decelerationRate="fast"
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryList}
+            />
+          </View>
+
+          {/* Fashion Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderWithLine}>
+              <View style={styles.headerLine} />
+              <Text style={styles.sectionTitleCentered}>Style Your Wardrobe</Text>
+              <View style={styles.headerLine} />
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.fashionContainer}>
+                {fashionCategoryData.map((item, index) => (
+                  <TouchableOpacity key={index} style={styles.fashionCard}>
+                    <Image 
+                      source={{ uri: item.image }} 
+                      style={styles.fashionImage}
+                      resizeMode="cover"
+                    />
+                    <Text style={styles.fashionTitle}>{item.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+
+          {/* Personal Care Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderWithLine}>
+              <View style={styles.headerLine} />
+              <Text style={styles.sectionTitleCentered}>Personal Care</Text>
+              <View style={styles.headerLine} />
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.personalCareContainer}>
+                {personalCareCategoryData.map((item, index) => (
+                  <TouchableOpacity key={index} style={styles.personalCareCard}>
+                    <View style={styles.personalCareImageContainer}>
+                      <Image 
+                        source={{ uri: item.image }} 
+                        style={styles.personalCareImage}
+                        resizeMode="contain"
+                      />
+                    </View>
+                    <Text style={styles.personalCareTitle}>{item.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+
+          {/* Electronics Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderWithLine}>
+              <View style={styles.headerLine} />
+              <Text style={styles.sectionTitleCentered}>Electronics</Text>
+              <View style={styles.headerLine} />
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.electronicsContainer}>
+                {electronicsCategoryData.map((item, index) => (
+                  <TouchableOpacity key={index} style={styles.electronicsCard}>
+                    <View style={styles.electronicsImageContainer}>
+                      <Image 
+                        source={{ uri: item.image }} 
+                        style={styles.electronicsImage}
+                        resizeMode="contain"
+                      />
+                    </View>
+                    <Text style={styles.electronicsTitle}>{item.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+
+          {/* Home & Decor Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderWithLine}>
+              <View style={styles.headerLine} />
+              <Text style={styles.sectionTitleCentered}>Home & Decor</Text>
+              <View style={styles.headerLine} />
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.homeDecorContainer}>
+                {homeAndDecorCategoryData.map((item, index) => (
+                  <TouchableOpacity key={index} style={styles.homeDecorCard}>
+                    <View style={styles.homeDecorImageContainer}>
+                      <Image 
+                        source={{ uri: item.image }} 
+                        style={styles.homeDecorImage}
+                        resizeMode="contain"
+                      />
+                    </View>
+                    <Text style={styles.homeDecorTitle}>{item.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+
+          {/* Footer Section */}
+          <View style={styles.footerSection}>
+            <Text style={styles.footerTitle}>Made With ❤️</Text>
+            <Text style={styles.footerSubtitle}>In Bengaluru</Text>
+            <Text style={styles.footerDescription}>
+              Your one-stop marketplace for everything you need
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -334,7 +622,7 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#7c5462",
   },
   scrollContainer: {
     flexGrow: 1,
@@ -355,17 +643,16 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 15,
     fontStyle: "italic",
-    marginHorizontal: -16, // cancel out parent's padding
+    marginHorizontal: -16,
   },
   logo: {
     color: "white",
     fontSize: 28,
     fontWeight: "bold",
-    marginLeft: 20, // Add left margin to logo
+    marginLeft: 20,
   },
   locationTxt: {
     color: "white",
-    //fontweight: "bold",
     fontSize: 14,
     marginRight: 4,
   },
@@ -378,9 +665,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 14,
     marginHorizontal: 6,
-    marginLeft:-12,
+    marginLeft: -12,
   },
-
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -414,7 +700,7 @@ const styles = StyleSheet.create({
     borderColor: "#f0f0f0",
   },
   menuItem: {
-    paddingVertical: 14,
+    paddingVertical: 10,
     paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
@@ -454,9 +740,8 @@ const styles = StyleSheet.create({
     width: 22,
     textAlign: "center",
   },
-
   catList: {
-    marginTop: 20,
+    marginTop: 13,
   },
   catCard: {
     width: 50,
@@ -467,7 +752,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "rgba(18, 16, 16, 0.2)",
+    backgroundColor: "rgba(21, 10, 10, 0.2)",
     borderWidth: 1,
     borderColor: "rgba(11, 10, 10, 0.1)",
     shadowColor: "#94de9bd6",
@@ -475,12 +760,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 3,
   },
-  iconEmoji: {
-    fontSize: 29,
-  },
   iconImg: {
     width: 40,
-    height: 40,
+    height: 50,
     resizeMode: "contain",
   },
   catLabel: {
@@ -490,19 +772,366 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   whiteSection: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f5f2f2",
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 20,
+  },
+  // New styles for enhanced sections
+  section: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+    
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: "#ff9130",
+    fontWeight: "500",
+  },
+  // Offer Section
+  offerSection: {
+    marginBottom: 24,
+  },
+  offerCard: {
+    backgroundColor: "#ff3c41",
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  offerContent: {
+    flex: 1,
+  },
+  offerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 4,
+  },
+  offerSubtext: {
+    fontSize: 14,
+    color: "white",
+    opacity: 0.9,
+    marginBottom: 12,
+  },
+  offerButton: {
+    backgroundColor: "white",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+  },
+  offerButtonText: {
+    color: "#ff3c41",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  offerImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  offerEmoji: {
+    fontSize: 30,
+  },
+  // Quick Access
+  quickAccessGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  quickAccessItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  quickAccessIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#f8f9fa",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#e9ecef",
+  },
+  quickAccessText: {
+    fontSize: 12,
+    color: "#666",
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  // Trending Section
+  trendingContainer: {
+    flexDirection: "row",
+    paddingLeft: 16,
+  },
+  trendingCard: {
+    width: 120,
+    marginRight: 12,
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  trendingImagePlaceholder: {
+    width: "100%",
+    height: 80,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 8,
   },
-  sectionSubtext: {
+  trendingEmoji: {
+    fontSize: 32,
+  },
+  trendingTitle: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  trendingSubtitle: {
+    fontSize: 10,
+    color: "#666",
+    marginBottom: 4,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  ratingText: {
+    fontSize: 10,
+    color: "#666",
+    marginLeft: 2,
+  },
+  // Section Headers with Lines
+  sectionHeaderWithLine: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  sectionTitleCentered: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#5A5555",
+    marginHorizontal: 16,
+  },
+  headerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#5A5555",
+    fontWeight: "bold",
+  },
+  // Category Lists
+  categoryList: {
+    alignItems: "center",
+  },
+  categoryRow: {
+    margin: 5,
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  categoryItem: {
+    margin: 5,
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  categoryImage: {
+    width: windowWidth * 0.3,
+    height: windowWidth * 0.3,
+    resizeMode: "contain",
+  },
+  categoryName: {
+    marginTop: windowWidth * 0.01,
+    color: "black",
+    fontSize: 12,
+    textAlign: "center",
+  },
+  // Fashion Section
+  fashionContainer: {
+    flexDirection: "row",
+    paddingLeft: 16,
+  },
+  fashionCard: {
+    marginRight: 12,
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  fashionImage: {
+    width: windowWidth * 0.3,
+    height: windowWidth * 0.3,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  fashionTitle: {
+    fontSize: 12,
+    color: "black",
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  // Personal Care Section
+  personalCareContainer: {
+    flexDirection: "row",
+    paddingLeft: 16,
+  },
+  personalCareCard: {
+    marginRight: 12,
+    alignItems: "center",
+  },
+  personalCareImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
+  },
+  personalCareImage: {
+    width: 50,
+    height: 50,
+  },
+  personalCareTitle: {
+    fontSize: 12,
+    color: "black",
+    textAlign: "center",
+    fontWeight: "500",
+    maxWidth: 80,
+  },
+  // Electronics Section
+  electronicsContainer: {
+    flexDirection: "row",
+    paddingLeft: 16,
+  },
+  electronicsCard: {
+    marginRight: 12,
+    alignItems: "center",
+  },
+  electronicsImageContainer: {
+    width: 90,
+    height: 90,
+    backgroundColor: "white",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    padding: 10,
+  },
+  electronicsImage: {
+    width: 70,
+    height: 70,
+  },
+  electronicsTitle: {
+    fontSize: 12,
+    color: "black",
+    textAlign: "center",
+    fontWeight: "500",
+    maxWidth: 90,
+  },
+  // Home & Decor Section
+  homeDecorContainer: {
+    flexDirection: "row",
+    paddingLeft: 16,
+  },
+  homeDecorCard: {
+    marginRight: 12,
+    alignItems: "center",
+  },
+  homeDecorImageContainer: {
+    width: 90,
+    height: 90,
+    backgroundColor: "white",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    padding: 10,
+  },
+  homeDecorImage: {
+    width: 70,
+    height: 70,
+  },
+  homeDecorTitle: {
+    fontSize: 12,
+    color: "black",
+    textAlign: "center",
+    fontWeight: "500",
+    maxWidth: 90,
+  },
+  // Footer Section
+  footerSection: {
+    backgroundColor: "#f8f9fa",
+    paddingVertical: 32,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    marginTop: 20,
+    borderRadius: 16,
+  },
+  footerTitle: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#303030",
+    marginBottom: 8,
+  },
+  footerSubtitle: {
+    fontSize: 20,
+    fontWeight: "300",
+    color: "#303030",
+    marginBottom: 12,
+  },
+  footerDescription: {
     fontSize: 14,
     color: "#666",
+    textAlign: "center",
+    lineHeight: 20,
   },
 });

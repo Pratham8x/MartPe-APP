@@ -1,12 +1,8 @@
-import { AddressType } from '../../common-types';
-import Constants from 'expo-constants';
-
-
-const BASE_URL = Constants.expoConfig?.extra?.BACKEND_BASE_URL;
+import { AddressType, ApiErrorResponseType } from '../../common-types';
 
 export const fetchAddresses = async (authToken: string) => {
   try {
-    const res = await fetch(`${BASE_URL}/users/address`, {
+    const res = await fetch(`${process.env.BACKEND_BASE_URL}/users/address`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${authToken}`,

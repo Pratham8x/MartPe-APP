@@ -7,7 +7,39 @@ import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import React from "react";
 import LikeButton from "../../components/common/likeButton";
 
-const StoreCard4 = ({
+
+interface StoreCard4Props {
+  storeData: {
+    id: string;
+    domain: string;
+    catalogs: any[]; // Replace with real type if available
+    descriptor: {
+      name: string;
+      images: string[];
+      symbol: string;
+    };
+    address: {
+      street: string;
+    };
+    geoLocation: {
+      lat: number;
+      lng: number;
+    };
+    calculated_max_offer: {
+      percent: number;
+    };
+    distance?: number;
+    time_to_ship_in_hours?: {
+      avg: number;
+    };
+  };
+  categoryFiltered: any; // Replace `any` with appropriate type
+  foodDetails: any;
+  handleOpenPress: () => void;
+  index: number;
+}
+
+const StoreCard4: React.FC<StoreCard4Props> = ({
   storeData,
   categoryFiltered,
   foodDetails,
@@ -37,7 +69,7 @@ const StoreCard4 = ({
 
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/(tabs)/home/productListing/${id}`)}
+      onPress={() => router.push(`../(tabs)/home/productListing/${id}`)}
       style={styles.container}
     >
       <TouchableOpacity style={styles.menu}>

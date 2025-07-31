@@ -7,12 +7,25 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
+type OfferDataType = {
+  id: string;
+  calculated_max_offer: {
+    percent: number;
+  };
+  descriptor: {
+    name: string;
+    images: string[];
+    symbol: string;
+  };
+};
 
-function OfferCard3({ offerData }) {
+interface OfferCard3Props {
+  offerData: OfferDataType;
+}
+
+function OfferCard3({ offerData }: OfferCard3Props) {
   if (!offerData) {
     return null;
-  } else {
-    console.log(offerData);
   }
 
   const {
@@ -25,18 +38,8 @@ function OfferCard3({ offerData }) {
   const screenWidth = Dimensions.get("window").width;
 
   return (
-    <View
-      style={[
-        styles.container,
-        { height: containerHeight, width: screenWidth },
-      ]}
-    >
-      <Image
-        source={{ uri: images[0] }}
-        // source={require('../../assets/offerCard3.png')}
-        style={styles.imgBg}
-        resizeMode="cover"
-      />
+    <View style={[styles.container, { height: containerHeight, width: screenWidth }]}>
+      <Image source={{ uri: images[0] }} style={styles.imgBg} resizeMode="cover" />
       <View style={styles.overlay}>
         <View style={styles.offerDescription}>
           <Text style={styles.discount}>Up to {Math.round(percent)}% Off</Text>
@@ -44,24 +47,19 @@ function OfferCard3({ offerData }) {
         </View>
         <TouchableOpacity
           onPressIn={() => {
-            router.push(`/(tabs)/home/productListing/${id}`);
+            router.push(`../(tabs)/home/productListing/${id}`);
           }}
           style={styles.button}
         >
           <Text style={styles.buttonText}>Order Now</Text>
         </TouchableOpacity>
         <View style={styles.logoContainer}>
-          <Image
-            source={{ uri: symbol }}
-            // source={require('../../assets/offerCard3Logo.png')}
-            style={styles.logoImage}
-          />
+          <Image source={{ uri: symbol }} style={styles.logoImage} />
         </View>
       </View>
     </View>
   );
 }
-
 export default OfferCard3;
 
 const styles = StyleSheet.create({
