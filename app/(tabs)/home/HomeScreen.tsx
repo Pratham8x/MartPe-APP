@@ -153,7 +153,7 @@ const HomeScreen = () => {
   };
 
   // Render functions for category sections
-  const renderFoodCategories = ({ item, index }) => {
+  const renderFoodCategories = ({ item , index }) => {
     if (index % 2 !== 0) return null;
     const nextItem = foodCategoryData[index + 1];
 

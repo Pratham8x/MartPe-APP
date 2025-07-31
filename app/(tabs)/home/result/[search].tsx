@@ -565,9 +565,7 @@ const Results: FC<SearchProps> = () => {
                 }}
               >
                 <ImageComp
-                  source={{
-                    uri: provider?.descriptor?.symbol,
-                  }}
+                  source={provider?.descriptor?.symbol}
                   imageStyle={{
                     aspectRatio: 1,
                     height: Dimensions.get("screen").width * 0.15,
@@ -647,7 +645,7 @@ const Results: FC<SearchProps> = () => {
 
             <TouchableOpacity
               onPress={() => {
-                router.push(`/(tabs)/home/productListing/${provider.id}`);
+                router.push(`../(tabs)/home/productListing/${provider.id}`);
               }}
             >
               <ForwardArrowSvg margin={70} />
@@ -681,11 +679,9 @@ const Results: FC<SearchProps> = () => {
                       }}
                     >
                       <ImageComp
-                        source={{
-                          uri:
+                        source={
                             product.descriptor?.images &&
-                            product.descriptor.images[0],
-                        }}
+                            product.descriptor.images[0]}
                         imageStyle={{
                           height: 100,
                           width: 100,
@@ -921,9 +917,7 @@ const Results: FC<SearchProps> = () => {
                 }}
               >
                 <ImageComp
-                  source={{
-                    uri: provider?.descriptor?.symbol,
-                  }}
+                  source={provider?.descriptor?.symbol}
                   imageStyle={{
                     aspectRatio: 1,
                     height: Dimensions.get("screen").width * 0.15,
@@ -974,7 +968,7 @@ const Results: FC<SearchProps> = () => {
 
             <TouchableOpacity
               onPress={() => {
-                router.push(`/(tabs)/home/productListing/${provider.id}`);
+                router.push(`../(tabs)/home/productListing/${provider.id}`);
               }}
             >
               <ForwardArrowSvg margin={30} />
@@ -991,7 +985,7 @@ const Results: FC<SearchProps> = () => {
             {products.map((product, index) => (
               <Pressable
                 onPress={() => {
-                  router.push(`/(tabs)/home/productDetails/${product.id}`);
+                  router.push(`../(tabs)/home/productDetails/${product.id}`);
                 }}
                 key={index}
                 style={styles.productItem}
@@ -1005,11 +999,9 @@ const Results: FC<SearchProps> = () => {
                   }}
                 >
                   <ImageComp
-                    source={{
-                      uri:
+                    source={
                         product.descriptor?.images &&
-                        product.descriptor.images[0],
-                    }}
+                        product.descriptor.images[0]}
                     imageStyle={{
                       height: Dimensions.get("screen").width * 0.3,
                       borderRadius: 10,
@@ -1114,9 +1106,7 @@ const Results: FC<SearchProps> = () => {
                 }}
               >
                 <ImageComp
-                  source={{
-                    uri: provider?.descriptor?.symbol,
-                  }}
+                  source={ provider?.descriptor?.symbol}
                   imageStyle={{
                     aspectRatio: 1,
                     height: Dimensions.get("screen").width * 0.15,
@@ -1164,7 +1154,7 @@ const Results: FC<SearchProps> = () => {
 
             <TouchableOpacity
               onPress={() => {
-                router.push(`/(tabs)/home/productListing/${provider.id}`);
+                router.push(`../(tabs)/home/productListing/${provider.id}`);
               }}
             >
               <ForwardArrowSvg margin={30} />
@@ -1181,7 +1171,7 @@ const Results: FC<SearchProps> = () => {
             {products.map((product, index) => (
               <Pressable
                 onPress={() => {
-                  router.push(`/(tabs)/home/productDetails/${product.id}`);
+                  router.push(`../(tabs)/home/productDetails/${product.id}`);
                 }}
                 key={index}
                 style={styles.productItem}
@@ -1196,11 +1186,9 @@ const Results: FC<SearchProps> = () => {
                     }}
                   >
                     <ImageComp
-                      source={{
-                        uri:
+                      source={
                           product.descriptor?.images &&
-                          product.descriptor.images[0],
-                      }}
+                          product.descriptor.images[0]}
                       imageStyle={{
                         height: width * 0.42,
                         width: width * 0.42,
@@ -1555,7 +1543,7 @@ const Results: FC<SearchProps> = () => {
                   ]}
                 >
                   {/* Restaurants serving {productData.name} */}
-                  Showing Results for ' {search} '
+                  Showing Results for  {search} 
                 </Text>
               </View>
               {data?.getSearchPageData?.catalogs?.length === 0 && (
@@ -1592,7 +1580,7 @@ const Results: FC<SearchProps> = () => {
               ]}
             >
               {/* Restaurants serving {productData.name} */}
-              Showing Results for ' {search} '
+              Showing Results for  {search} 
             </Text>
           </View>
           {data?.getSearchPageData?.vendors?.length === 0 && (
@@ -1610,7 +1598,7 @@ const Results: FC<SearchProps> = () => {
             return (
               <TouchableOpacity
                 onPress={() => {
-                  router.push(`/(tabs)/home/productListing/${store.id}`);
+                  router.push(`../(tabs)/home/productListing/${store.id}`);
                 }}
                 key={index}
                 style={{
@@ -1630,7 +1618,7 @@ const Results: FC<SearchProps> = () => {
               >
                 <View>
                   <ImageComp
-                    source={{ uri: store?.descriptor?.symbol }}
+                    source={ store?.descriptor?.symbol }
                     imageStyle={{
                       aspectRatio: 1,
                       height: 60,

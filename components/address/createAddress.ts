@@ -1,9 +1,11 @@
-'use server';
+// createAddress.ts
+import { AddressType, ApiErrorResponseType } from '../../common-types';
+import Constants from 'expo-constants';
 
-import { AddressType } from '@/lib/api/common-types';
-import { cookies } from 'next/headers';
+const BASE_URL = Constants.expoConfig?.extra?.BACKEND_BASE_URL;
 
-export async function createAddressAction(
+export const createAddress = async (
+  authToken: string,
   type: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other',
   name: string,
   phone: string,
@@ -14,13 +16,10 @@ export async function createAddressAction(
   state: string,
   pincode: string,
   building?: string
-) {
+) => {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('auth-token')?.value;
-
     const response = await fetch(
-      `${process.env.BACKEND_BASE_URL}/users/address`,
+      `${BASE_URL}/users/address`,
       {
         method: 'POST',
         body: JSON.stringify({
@@ -38,16 +37,19 @@ export async function createAddressAction(
         headers: {
           Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json'
-        }
+        },
+        cache: 'no-cache'
       }
     );
+
     if (!response.ok) {
+      console.log('create address failed');
       throw new Error();
     }
-    const data = (await response.json()) as AddressType;
-    return { success: true, data };
-  } catch (e) {
-    console.log('create addr action error:', e);
-    return { success: false, error: { message: 'create address failed' } };
+
+    return (await response.json()) as AddressType;
+  } catch (error) {
+    console.log('Create address error', error);
+     return null;
   }
-}
+};

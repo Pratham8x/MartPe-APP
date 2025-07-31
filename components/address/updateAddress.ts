@@ -1,10 +1,12 @@
-'use server';
 
-import { AddressType } from '@/lib/api/common-types';
-import { cookies } from 'next/headers';
+// updateAddress.ts
+import Constants from 'expo-constants';
 
-export async function updateAddressAction(
-  addressId: string,
+const BASE_URL = Constants.expoConfig?.extra?.BACKEND_BASE_URL;
+
+export const updateAddress = async (
+  authToken: string,
+  // addressId: string,
   type?: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other',
   name?: string,
   phone?: string,
@@ -15,13 +17,10 @@ export async function updateAddressAction(
   state?: string,
   pincode?: string,
   building?: string
-) {
+) => {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('auth-token')?.value;
-
     const response = await fetch(
-      `${process.env.BACKEND_BASE_URL}/users/address?addressId=${addressId}`,
+      `${BASE_URL}/users/address`,
       {
         method: 'PUT',
         body: JSON.stringify({
@@ -39,18 +38,19 @@ export async function updateAddressAction(
         headers: {
           Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json'
-        }
+        },
+        cache: 'no-cache'
       }
     );
+
     if (!response.ok) {
-      const data = await response.json();
-      console.log('data notok:', data);
+      console.log('update address failed');
       throw new Error();
     }
-    // const data = (await response.json()) as AddressType;
-    return { success: true };
-  } catch (e) {
-    console.log('update addr action error:', e);
-    return { success: false, error: { message: 'update address failed' } };
+
+    return await response.json();
+  } catch (error) {
+    console.log('Update address error', error);
+     return null;
   }
-}
+};

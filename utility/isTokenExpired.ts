@@ -1,4 +1,4 @@
-import { me } from "graphql/api/user";
+import { me } from "../gql/api/user";
 
 export const isTokenExpired = async (token: string) => {
   try {
