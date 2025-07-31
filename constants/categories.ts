@@ -4,7 +4,7 @@ export const categoryData = [
     name: "Food",
     link: "Food",
     image:
-      "https://res.cloudinary.com/doex3braa/image/upload/v1703051321/martpe/category/gfwgupd0gkmn2dc7euj7.png",
+    "https://res.cloudinary.com/doex3braa/image/upload/v1703053767/martpe/personal%20care/koeo8kyv4zhsby7d3diu.png",
   },
   {
     id: 2,

@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 import { generateOTP } from "../OTP/gen-otp";
+import useUserDetails from "../../hook/useUserDetails"; // Add this import
 
 // Constants
 const PRIMARY_COLOR = "#FB3E44";
@@ -26,11 +27,26 @@ const BUTTON_WIDTH = widthPercentageToDP("90");
 const NewLogin: React.FC = () => {
   const router = useRouter();
   const { t } = useTranslation();
+  
+  // Add authentication check
+  const { isAuthenticated, isLoading: authLoading, checkAuthentication } = useUserDetails();
 
   const [mobileNumber, setMobileNumber] = useState<string>("");
   const [textInputBorderColor, setTextInputBorderColor] = useState(TEXT_INPUT_COLOR);
   const [isValidMobileNumber, setIsValidMobileNumber] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Check if user is already authenticated on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (!authLoading && isAuthenticated && checkAuthentication()) {
+        console.log("User is already authenticated, redirecting to home");
+        router.replace("../(tabs)/home"); // Replace with your home screen route
+      }
+    };
+    
+    checkAuth();
+  }, [isAuthenticated, authLoading, checkAuthentication, router]);
 
   // Input handlers
   const customTextInputOnFocus = () => setTextInputBorderColor("#030303");
@@ -87,6 +103,16 @@ const NewLogin: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  // Show loading screen while checking authentication status
+  if (authLoading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={PRIMARY_COLOR} />
+        <Text style={styles.loadingText}>{t("Loading...")}</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -153,42 +179,6 @@ const NewLogin: React.FC = () => {
           )}
         </TouchableOpacity>
 
-        {/* Divider
-        <View style={styles.dividerContainer}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>
-            {t("OR")}
-          </Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        {/* Social Login Buttons */}
-        {/* <TouchableOpacity
-          style={styles.socialButton}
-          accessibilityLabel="Continue with Google"
-        >
-          <Image
-            source={require("../../assets/images/google-logo.png")}
-            style={styles.socialIcon}
-          />
-          <Text style={styles.socialButtonText}>
-            {t("Continue with Google")}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.socialButton}
-          accessibilityLabel="Continue with WhatsApp"
-        >
-          <Image
-            source={require("../../assets/images/whatsapp.webp")}
-            style={[styles.socialIcon, { width: 25, height: 25 }]}
-          />
-          <Text style={styles.socialButtonText}>
-            {t("Continue with WhatsApp")}
-          </Text>
-        </TouchableOpacity>  */}
-
         {/* Footer Links */}
         <Text style={styles.footerText}>
           {t("By continuing, you agree to our")}
@@ -206,18 +196,26 @@ const NewLogin: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-container: {
-  flex: 1,
-  backgroundColor: "#fff",
-  justifyContent: "space-between", // 👈 Key to push footer down
-},
-contentContainer: {
-  flexGrow: 1,
-  justifyContent: "center",
-  alignItems: "center",
-  paddingHorizontal: 20,
-},
-
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    justifyContent: "space-between",
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: PRIMARY_COLOR,
+  },
+  contentContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
   logo: {
     width: INPUT_WIDTH,
     height: widthPercentageToDP(50),
@@ -270,58 +268,16 @@ contentContainer: {
     fontWeight: "600",
     fontSize: 20,
   },
-  dividerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 20,
-    width: BUTTON_WIDTH,
+  footerText: {
+    textAlign: "center",
+    fontSize: widthPercentageToDP("2.5"),
+    paddingHorizontal: 20,
+    marginTop: 20,
   },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#d9d9d9",
+  footerLink: {
+    color: "#000",
+    fontWeight: "bold",
   },
-  dividerText: {
-    fontWeight: "600",
-    marginHorizontal: 10,
-    fontSize: 16,
-  },
-  socialButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 15,
-    marginBottom: 10,
-    borderRadius: 50,
-    width: BUTTON_WIDTH,
-    borderWidth: 1,
-    borderColor: "#C7C4C4",
-  },
-  socialIcon: {
-    height: 16,
-    width: 16,
-  },
-  socialButtonText: {
-    fontSize: 18,
-    marginLeft: 15,
-    marginBottom: 20,
-  },
-footerContainer: {
-  alignItems: "center",
-  paddingBottom: 20,
-},
-footerText: {
-  textAlign: "center",
-  fontSize: widthPercentageToDP("2.5"),
-  paddingHorizontal: 20,
-  marginTop: 20,
-},
-footerLink: {
-  color: "#000",
-  fontWeight: "bold",
-},
-
 });
 
 export default NewLogin;

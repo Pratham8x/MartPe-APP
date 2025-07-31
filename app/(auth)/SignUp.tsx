@@ -14,7 +14,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import useUserDetails from "../../hook/useUserDetails";
- import { createUser } from "../../user/create-user";
+import { createUser } from "../../user/create-user";
 
 interface UserFormData {
   firstName: string;
@@ -31,7 +31,7 @@ interface FormValidation {
 }
 
 const SignUp: React.FC = () => {
-  const { saveUserDetails } = useUserDetails();
+  const { saveUserDetails, isAuthenticated, isLoading: authLoading } = useUserDetails();
   const router = useRouter();
   const { mobileNumber } = useLocalSearchParams();
   
@@ -56,6 +56,14 @@ const SignUp: React.FC = () => {
     email: "",
     phoneNumber: "",
   });
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      console.log("User is already authenticated, redirecting to home");
+      router.replace("../(tabs)/home");
+    }
+  }, [isAuthenticated, authLoading, router]);
 
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -115,7 +123,7 @@ const SignUp: React.FC = () => {
     return baseValidation && validation.phoneNumber;
   };
 
-  // Handle form submission this is main need to fix it after some time
+  // Handle form submission
   const handleSubmit = async () => {
     if (!isFormValid()) {
       Alert.alert("Validation Error", "Please fill all required fields correctly");
@@ -149,21 +157,26 @@ const SignUp: React.FC = () => {
       if (response.status === 200 && response.data) {
         const userData = response.data;
 
-        // Prepare user details for storage
+        // Prepare user details for storage with proper structure
         const userDetails = {
-          userId: userData._id,
-          accessToken: userData.token,
-          refreshToken: userData.token,
-          firstName: userData.firstName,
-          lastName: userData.lastName || "",
-          phoneNumber: userData.phoneNumber,
-          email: userData.email || "",
+          accessToken: userData.token || userData.accessToken || "",
+          refreshToken: userData.refreshToken || userData.token || "",
+          firstName: userData.firstName || formData.firstName.trim(),
+          lastName: userData.lastName || formData.lastName.trim(),
+          phoneNumber: userData.phoneNumber || phoneToUse,
+          email: userData.email || formData.email.trim(),
+          userId: userData._id || userData.id || "",
         };
 
-        // Save user details
+        console.log("Saving user details:", userDetails);
+
+        // Save user details using the hook
         await saveUserDetails(userDetails);
         
-        // Navigate to home screen
+        console.log("User details saved successfully, navigating to home");
+        
+        // Navigate to home screen - router will handle this automatically due to auth state change
+        // But we can also manually navigate to ensure immediate redirect
         router.replace("../(tabs)/home");
         
       } else {
@@ -190,7 +203,16 @@ const SignUp: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
+  // Show loading screen while checking authentication
+  if (authLoading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#FB3E44" />
+        <Text style={styles.loadingText}>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -312,6 +334,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#ffffff",
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#FB3E44",
   },
   keyboardContainer: {
     flex: 1,

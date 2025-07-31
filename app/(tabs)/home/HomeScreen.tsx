@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 14,
     marginHorizontal: 6,
-    marginLeft:-1,
+    marginLeft:-12,
   },
 
   searchBar: {
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   catCard: {
-    width: 70,
+    width: 50,
     alignItems: "center",
     marginRight: 16,
   },
@@ -467,23 +467,27 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(18, 16, 16, 0.2)",
+    borderWidth: 1,
+    borderColor: "rgba(11, 10, 10, 0.1)",
+    shadowColor: "#94de9bd6",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: 3,
   },
   iconEmoji: {
-    fontSize: 24,
+    fontSize: 29,
   },
   iconImg: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
     resizeMode: "contain",
   },
   catLabel: {
     color: "white",
     fontSize: 12,
     textAlign: "center",
+    fontWeight: "500",
   },
   whiteSection: {
     backgroundColor: "#ffffff",
