@@ -11,6 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import Constants from "expo-constants";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
@@ -85,7 +86,7 @@ const AddNewAddress: React.FC = () => {
     });
   }, []);
 
-  const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
 
   const handleInputChange = (field: string, value: any) => {
     setAddressInput((prevInput) => ({
@@ -319,7 +320,7 @@ const AddNewAddress: React.FC = () => {
                 autoCompleteAddress(data, details);
               }}
               query={{
-                key: GOOGLE_MAPS_API_KEY,
+                key: MAPS_KEY,
                 language: "en",
                 components: "country:in",
               }}

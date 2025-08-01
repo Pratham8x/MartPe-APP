@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   Alert,
   Dimensions,
@@ -19,6 +19,7 @@ import { deleteAddress } from "../../components/address/deleteAddress";
 import { updateAddress } from "../../components/address/updateAddress";
 import Header from '../../components/address/AddressHeader';
 import Constants from 'expo-constants';
+import useUserDetails from '../../hook/useUserDetails';
 
 const BASE_URL = Constants.expoConfig?.extra?.BACKEND_BASE_URL;
 
@@ -44,6 +45,9 @@ interface AddressType {
 // Create fetchAddress function since it's missing
 const fetchAddress = async (authToken: string): Promise<AddressType[] | null> => {
   try {
+    console.log('Fetching addresses with token:', authToken ? 'Token present' : 'No token');
+    console.log('API URL:', `${BASE_URL}/users/address`);
+    
     const response = await fetch(
       `${BASE_URL}/users/address`,
       {
@@ -56,45 +60,85 @@ const fetchAddress = async (authToken: string): Promise<AddressType[] | null> =>
       }
     );
 
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+
     if (!response.ok) {
-      console.log('fetch address failed');
-      throw new Error();
+      const errorText = await response.text();
+      console.log('Fetch address failed:', response.status, errorText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('Fetched address data:', data);
+    return data;
   } catch (error) {
-    console.log('Fetch address error', error);
+    console.error('Fetch address error:', error);
     return null;
   }
 };
 
 const SavedAddresses: React.FC = () => {
+  // Get user details and authentication status
+  const { userDetails, isLoading: authLoading, isAuthenticated, checkAuthentication } = useUserDetails();
+  
   // states
   const selectedDetails = useDeliveryStore((state) => state.selectedDetails);
   const [isLoading, setIsLoading] = useState(true);
   const [addresses, setAddresses] = useState<AddressType[]>([]);
-  const [authToken, setAuthToken] = useState<string>(""); // You'll need to get this from your auth system
+  const [error, setError] = useState<string | null>(null);
+
+  // Get the access token from user details
+  const authToken = userDetails?.accessToken || "";
+
+  // Check authentication status when component mounts
+  useEffect(() => {
+    if (!authLoading) {
+      if (!isAuthenticated || !checkAuthentication()) {
+        console.log('User not authenticated');
+        setError('Please log in to view your saved addresses.');
+        setIsLoading(false);
+      }
+    }
+  }, [authLoading, isAuthenticated, checkAuthentication]);
 
   // handlers
   const fetchUserAddresses = async () => {
     try {
+      console.log('Starting to fetch addresses...');
       setIsLoading(true);
+      setError(null);
+      
+      if (!authToken) {
+        console.log('No auth token available');
+        setError('No authentication token available');
+        setAddresses([]);
+        return;
+      }
+
       const addressesData = await fetchAddress(authToken);
       console.log("Fetched addresses:", addressesData);
+      
       if (addressesData && Array.isArray(addressesData)) {
         setAddresses(addressesData); 
+        console.log(`Successfully loaded ${addressesData.length} addresses`);
+      } else if (addressesData === null) {
+        setError('Failed to fetch addresses. Please try again.');
+        setAddresses([]);
       } else {
+        console.log('No addresses found or invalid response format');
         setAddresses([]);
       }
     } catch (error) {
       console.error("Error fetching addresses:", error);
+      setError('Failed to load addresses. Please try again.');
       setAddresses([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDeleteAddress = async (addressId: string) => {
+  const handleDeleteAddress = async (authToken: string) => {
     Alert.alert(
       "Delete Address",
       "Are you sure you want to delete this address?",
@@ -149,16 +193,47 @@ const SavedAddresses: React.FC = () => {
     }
   };
 
+  const handleRetry = () => {
+    if (authToken && isAuthenticated) {
+      fetchUserAddresses();
+    } else {
+      setError('Please log in to continue.');
+    }
+  };
+
   // hooks
   useFocusEffect(
     useCallback(() => {
-      if (authToken) {
+      console.log('useFocusEffect triggered');
+      console.log('authLoading:', authLoading);
+      console.log('isAuthenticated:', isAuthenticated);
+      console.log('authToken:', authToken ? 'present' : 'missing');
+      
+      if (!authLoading && isAuthenticated && authToken) {
         fetchUserAddresses();
       }
-    }, [authToken])
+    }, [authToken, authLoading, isAuthenticated])
   );
 
-  if (isLoading) {
+  // Show error state
+  if (error && !isLoading) {
+    return (
+      <SafeAreaView style={styles.savedAddressesContainer}>
+        <Header title="Pick or Add Address" />
+        <View style={styles.errorContainer}>
+          <MaterialCommunityIcons name="alert-circle" size={80} color="#E74C3C" />
+          <Text style={styles.errorText}>Oops! Something went wrong</Text>
+          <Text style={styles.errorSubtext}>{error}</Text>
+          <TouchableOpacity onPress={handleRetry} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Show loading while checking authentication
+  if (authLoading || isLoading) {
     return <Loader />;
   }
 
@@ -363,7 +438,6 @@ const SavedAddressCard: React.FC<SavedAddressCard> = (props) => {
       <View style={styles.addressButtonsContainer}>
         <View style={styles.leftButtonsContainer}>
           <TouchableOpacity style={styles.shareButton}>
-            <MaterialCommunityIcons name="share-variant" size={16} color="#01884B" />
             <ShareButton type="address" address={fullAddress} />
           </TouchableOpacity>
           
@@ -441,6 +515,37 @@ const styles = StyleSheet.create({
     color: "#999",
     textAlign: "center",
     marginTop: 8,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  errorText: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#E74C3C",
+    marginTop: 16,
+    textAlign: "center",
+  },
+  errorSubtext: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: "#01884B",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
   cardContainer: {
     flex: 1,
