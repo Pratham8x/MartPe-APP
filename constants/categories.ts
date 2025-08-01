@@ -3,45 +3,40 @@ export const categoryData = [
     id: 1,
     name: "Food",
     link: "Food",
-    image:
-    "https://res.cloudinary.com/doex3braa/image/upload/v1703053767/martpe/personal%20care/koeo8kyv4zhsby7d3diu.png",
+    image: require("../assets/images/food.webp"),
+
   },
   {
     id: 2,
     name: "Grocery",
     link: "Grocery",
-    image:
-      "https://res.cloudinary.com/doex3braa/image/upload/v1703051321/martpe/category/vsnwsrlmbvrezxhxxzto.png",
+     image: require("../assets/images/grocery.webp"),
   },
   {
     id: 3,
     name: "Personal Care",
     link: "PersonalCare",
-    image:
-      "https://res.cloudinary.com/doex3braa/image/upload/v1703051321/martpe/category/kmb2behq8uwqemea9xea.png",
+     image: require("../assets/images/beauty.webp"),
   },
   {
     id: 4,
     name: "Fashion",
     link: "Fashion",
-    image:
-      "https://res.cloudinary.com/doex3braa/image/upload/v1703051321/martpe/category/zb71yodp0yy7pljdlfzl.png",
+    image: require("../assets/images/fashion.webp"),
   },
   {
     id: 5,
     name: "Electronics",
     link: "Electronics",
-    image:
-      "https://res.cloudinary.com/doex3braa/image/upload/v1703051321/martpe/category/wjj0hd2dk1epov6ymsbt.png",
+     image: require("../assets/images/electronics.webp"),
   },
   {
     id: 6,
     name: "Home & Decor",
     link: "HomeAndDecor",
-    image:
-      "https://res.cloudinary.com/doex3braa/image/upload/v1703051321/martpe/category/qdu1bddfxhc2jcdeirpj.png",
+    image: require("../assets/images/interior.webp"),
   },
-];
+]; 
 
 export const personalCareCategoryData = [
   {

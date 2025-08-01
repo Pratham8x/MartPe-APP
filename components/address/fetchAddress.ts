@@ -1,22 +1,20 @@
+// fetchAddress.ts
 import { AddressType } from '../../common-types';
 import Constants from 'expo-constants';
 
 const BASE_URL = Constants.expoConfig?.extra?.BACKEND_BASE_URL;
 
-export const fetchAddressAction = async (
-  authToken: string,
-  addressId: string
-): Promise<AddressType | null> => {
+export const fetchAddress = async (authToken: string): Promise<AddressType[] | null> => {
   try {
     const response = await fetch(
-      `${BASE_URL}/users/address?addressId=${addressId}`,
+      `${BASE_URL}/users/address`,
       {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        cache: 'no-cache',
+        cache: 'no-cache'
       }
     );
 
@@ -25,10 +23,9 @@ export const fetchAddressAction = async (
       throw new Error();
     }
 
-    const data = await response.json();
-    return data as AddressType; // ✅ Adjust if nested
+    return await response.json();
   } catch (error) {
-    console.log('fetch address error:', error);
+    console.log('Fetch address error', error);
     return null;
   }
 };

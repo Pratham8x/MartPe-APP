@@ -14,7 +14,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
-  import Header from '../../components/address/AddressHeader';
+import Header from '../../components/address/AddressHeader';
 import { createAddress } from "../../components/address/createAddress";
 import axios from "axios";
 import useUserDetails from "../../hook/useUserDetails";
@@ -52,9 +52,10 @@ const AddNewAddress: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { userDetails, getUserDetails } = useUserDetails();
+  const [authToken, setAuthToken] = useState<string>(""); // You'll need to get this from your auth system
 
   const [addressInput, setAddressInput] = useState<AddressInput>({
-    type: 'Other',
+    type: 'Home', // Changed default from 'Other' to 'Home'
     name: "",
     phone: "",
     gps: {
@@ -131,7 +132,7 @@ const AddNewAddress: React.FC = () => {
   const validateInputs = (): boolean => {
     const errors: string[] = [];
 
-    if (!addressInput.type || addressInput.type === 'Other') {
+    if (!addressInput.type) {
       errors.push("Please select an address type");
     }
     if (!addressInput.name.trim()) {
@@ -167,9 +168,15 @@ const AddNewAddress: React.FC = () => {
   const handleAddAddress = async () => {
     if (!validateInputs()) return;
 
+    if (!authToken) {
+      Alert.alert("Error", "Authentication token is missing. Please login again.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const result = await createAddress(
+        authToken, // Added authToken as first parameter
         addressInput.type,
         addressInput.name,
         addressInput.phone,
@@ -182,7 +189,7 @@ const AddNewAddress: React.FC = () => {
         addressInput.building
       );
 
-      if (result.success) {
+      if (result) {
         Alert.alert("Success", "Address added successfully!", [
           {
             text: "OK",
@@ -190,7 +197,7 @@ const AddNewAddress: React.FC = () => {
           },
         ]);
       } else {
-        Alert.alert("Error", result.error?.message || "Failed to add address");
+        Alert.alert("Error", "Failed to add address. Please try again.");
       }
     } catch (error) {
       console.error("Error adding address:", error);
@@ -252,9 +259,26 @@ const AddNewAddress: React.FC = () => {
   };
 
   const handleTypeChange = (value: string) => {
+    // Map the display name back to the API value
+    let apiValue: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other';
+    switch (value) {
+      case 'Friends & Family':
+        apiValue = 'FriendsAndFamily';
+        break;
+      case 'Home':
+        apiValue = 'Home';
+        break;
+      case 'Work':
+        apiValue = 'Work';
+        break;
+      default:
+        apiValue = 'Other';
+        break;
+    }
+    
     setAddressInput((prev) => ({
       ...prev,
-      type: value as 'Home' | 'Work' | 'FriendsAndFamily' | 'Other',
+      type: apiValue,
     }));
   };
 

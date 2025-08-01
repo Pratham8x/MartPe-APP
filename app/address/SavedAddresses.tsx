@@ -15,11 +15,13 @@ import useDeliveryStore from "../../state/deliveryAddressStore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Loader from "../../components/common/Loader";
 import ShareButton from "../../components/common/Share";
-import { fetchAddress } from "../../components/address/fetchAddress";
 import { deleteAddress } from "../../components/address/deleteAddress";
 import { updateAddress } from "../../components/address/updateAddress";
-  import Header from '../../components/address/AddressHeader';
-  
+import Header from '../../components/address/AddressHeader';
+import Constants from 'expo-constants';
+
+const BASE_URL = Constants.expoConfig?.extra?.BACKEND_BASE_URL;
+
 // Define the AddressType interface based on your API structure
 interface AddressType {
   id: string;
@@ -39,29 +41,58 @@ interface AddressType {
   isDefault?: boolean;
 }
 
+// Create fetchAddress function since it's missing
+const fetchAddress = async (authToken: string): Promise<AddressType[] | null> => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/users/address`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        cache: 'no-cache'
+      }
+    );
+
+    if (!response.ok) {
+      console.log('fetch address failed');
+      throw new Error();
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.log('Fetch address error', error);
+    return null;
+  }
+};
+
 const SavedAddresses: React.FC = () => {
   // states
   const selectedDetails = useDeliveryStore((state) => state.selectedDetails);
   const [isLoading, setIsLoading] = useState(true);
-const [addresses, setAddresses] = useState<AddressType[]>([]);
+  const [addresses, setAddresses] = useState<AddressType[]>([]);
   const [authToken, setAuthToken] = useState<string>(""); // You'll need to get this from your auth system
 
   // handlers
- const fetchUserAddresses = async () => {
-  try {
-    setIsLoading(true);
-    const addressesData = await fetchAddress(addressId);
-    if (addressesData) {
-      setAddresses(addressesData); 
+  const fetchUserAddresses = async () => {
+    try {
+      setIsLoading(true);
+      const addressesData = await fetchAddress(authToken);
+      console.log("Fetched addresses:", addressesData);
+      if (addressesData && Array.isArray(addressesData)) {
+        setAddresses(addressesData); 
+      } else {
+        setAddresses([]);
+      }
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+      setAddresses([]);
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching addresses:", error);
-
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   const handleDeleteAddress = async (addressId: string) => {
     Alert.alert(
@@ -77,8 +108,8 @@ const [addresses, setAddresses] = useState<AddressType[]>([]);
           style: "destructive",
           onPress: async () => {
             try {
-              const result = await deleteAddress(addressId);
-              if (result.success) {
+              const result = await deleteAddress(authToken);
+              if (result) {
                 await fetchUserAddresses();
                 Alert.alert("Success", "Address deleted successfully");
               } else {
@@ -103,9 +134,9 @@ const [addresses, setAddresses] = useState<AddressType[]>([]);
       }));
       setAddresses(updatedAddresses);
 
-      // Update on server - you might need to modify updateAddressAction to handle isDefault
-      const result = await updateAddress(addressId);
-      if (result.success) {
+      // Update on server
+      const result = await updateAddress(authToken);
+      if (result) {
         await fetchUserAddresses();
       } else {
         Alert.alert("Error", "Failed to mark address as default");
@@ -121,7 +152,9 @@ const [addresses, setAddresses] = useState<AddressType[]>([]);
   // hooks
   useFocusEffect(
     useCallback(() => {
-      fetchUserAddresses();
+      if (authToken) {
+        fetchUserAddresses();
+      }
     }, [authToken])
   );
 
@@ -205,8 +238,6 @@ const shadowEffect = {
   shadowRadius: 3.84,
   elevation: 5,
 };
-
-
 
 interface SavedAddressCard {
   type: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other';

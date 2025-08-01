@@ -5,9 +5,9 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  ScrollView,
+  Image,
 } from "react-native";
-//import Carousel from "react-native-snap-carousel";
-import ImageComp from "../common/ImageComp";
 import { router } from "expo-router";
 import { widthPercentageToDP } from "react-native-responsive-screen";
 
@@ -15,16 +15,26 @@ const { width: screenWidth } = Dimensions.get("window");
 
 const OfferCard = ({ items }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const carouselRef = useRef(null);
+  const scrollViewRef = useRef(null);
 
-  // set the offers active index to change based on time interval
+  // Auto-scroll functionality
   useEffect(() => {
-    const interval = setInterval(() => {
-      const nextIndex = activeIndex === items?.length - 1 ? 0 : activeIndex + 1;
-      carouselRef.current.snapToItem(nextIndex);
-    }, 5000); // change card every 3 seconds
+    if (!items || items.length <= 1) return;
 
-    return () => clearInterval(interval); // clear timer on component unmount
+    const interval = setInterval(() => {
+      const nextIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
+      setActiveIndex(nextIndex);
+      
+      // Auto scroll to next item
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({
+          x: nextIndex * screenWidth * 0.85,
+          animated: true,
+        });
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [activeIndex, items?.length]);
 
   const getOfferBackground = (num) => {
@@ -50,163 +60,132 @@ const OfferCard = ({ items }) => {
       case 9:
         return "#3EBB3C";
       default:
-        return "#466466"; // Fallback color
+        return "#466466";
     }
   };
 
-  const getOfferColor = (category) => {
-    switch (category) {
-      case 0:
-        return "#C40000";
-      case 1:
-        return "#BD6B09";
-      case 2:
-        return "#000000";
-      case 3:
-        return "#840058";
-      case 4:
-        return "#98074D";
-      case 5:
-        return "#F48535";
-      case 6:
-        return "#000000";
-      case 7:
-        return "#164E0D";
-      case 8:
-        return "#164E0D";
-      default:
-        return "#D3D3D3"; // Fallback color
-    }
+  const handleScroll = (event) => {
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    const index = Math.round(scrollPosition / (screenWidth * 0.85));
+    setActiveIndex(index);
   };
 
-  // Render each item in the carousel
-  const renderOfferItem = ({ item, index }) => {
-    return (
-      <TouchableOpacity
-        onPress={() => {
-          router.push(`/(tabs)/home/productListing/${item?.id}`);
-        }}
-        style={[
-          styles.cardOffer,
-          {
-            backgroundColor: getOfferBackground(index),
-            borderRadius: 10,
-          },
-        ]}
-      >
-        {/* offer text */}
-        <View>
-          {/* offer header text */}
-          <Text style={styles.offerHeaderText}>
-            Upto {Math.ceil(item?.calculated_max_offer?.percent)}% Off
-          </Text>
-
-          {/* offer sub-header text */}
-          <Text style={styles.offerSubHeaderText}>
-            on {item?.descriptor?.name}
-          </Text>
-
-          {/* shop now button */}
-          <View style={styles.shopNowButton}>
-            <Text
-              style={{
-                color: getOfferBackground(index),
-                fontWeight: "bold",
-                textAlign: "center",
-              }}
-            >
-              Order Now
-            </Text>
-          </View>
-
-          {/* T&C apply text */}
-          <Text style={styles.tcText}>*T&C apply</Text>
-        </View>
-
-        {/* offer image */}
-        <View style={styles.offerImageContainer}>
-          <ImageComp
-            source={{
-              uri: item.descriptor?.symbol,
-            }}
-            imageStyle={styles.offerImage}
-            resizeMode="contain"
-          />
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  if (!items || items.length === 0) {
+    return null;
+  }
 
   return (
-    <View style={{ marginLeft: -Dimensions.get("screen").width * 0.04 }}>
-      {/* offers carousel */}
-      <Carousel
-        ref={carouselRef}
-        data={items}
-        renderItem={renderOfferItem}
-        sliderWidth={screenWidth}
-        itemWidth={screenWidth * 0.85} // 80% of screen width for the active card
-        onSnapToItem={(index) => setActiveIndex(index)}
-        activeSlideAlignment={"center"}
-        inactiveSlideScale={0.9} // Slightly smaller scale for inactive cards
-        inactiveSlideOpacity={0.7}
-
-        // Slightly lower opacity for inactive cards
-      />
-      {/* <Pagination
-        dotsLength={items.length}
-        activeDotIndex={activeIndex}
-        containerStyle={styles.paginationContainer}
-        dotStyle={styles.paginationDot}
-        inactiveDotStyle={styles.inactiveDot}
-        inactiveDotOpacity={0.4}
-        inactiveDotScale={0.6}
-      /> */}
-
-      <View style={{ alignItems: "center", marginVertical: 10 }}>
-        {/* pagination component */}
-        {items?.length > 1 && (
-          <Text
-            style={{
-              backgroundColor: "#656565",
-              color: "#FFFFFF",
-              textAlign: "center",
-              width: screenWidth * 0.15,
-              borderRadius: 10,
-              // fontSize: ,
+    <View style={styles.container}>
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={styles.scrollContainer}
+        snapToInterval={screenWidth * 0.85}
+        decelerationRate="fast"
+      >
+        {items.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => {
+              router.push(`../(tabs)/home/productListing/${item?.id}`);
             }}
+            style={[
+              styles.cardOffer,
+              {
+                backgroundColor: getOfferBackground(index),
+                borderRadius: 10,
+                width: screenWidth * 0.85,
+                marginHorizontal: screenWidth * 0.075, // Center the cards
+              },
+            ]}
           >
-            {activeIndex + 1}/{items?.length}
+            {/* offer text */}
+            <View style={styles.textContainer}>
+              {/* offer header text */}
+              <Text style={styles.offerHeaderText}>
+                Upto {Math.ceil(item?.calculated_max_offer?.percent)}% Off
+              </Text>
+
+              {/* offer sub-header text */}
+              <Text style={styles.offerSubHeaderText}>
+                on {item?.descriptor?.name}
+              </Text>
+
+              {/* shop now button */}
+              <TouchableOpacity style={styles.shopNowButton}>
+                <Text
+                  style={[
+                    styles.shopNowText,
+                    {
+                      color: getOfferBackground(index),
+                    }
+                  ]}
+                >
+                  Order Now
+                </Text>
+              </TouchableOpacity>
+
+              {/* T&C apply text */}
+              <Text style={styles.tcText}>*T&C apply</Text>
+            </View>
+
+            {/* offer image */}
+            <View style={styles.offerImageContainer}>
+              <Image
+                source={{
+                  uri: item.descriptor?.symbol,
+                }}
+                style={styles.offerImage}
+                resizeMode="contain"
+              />
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Pagination indicator */}
+      {items.length > 1 && (
+        <View style={styles.paginationContainer}>
+          <Text style={styles.paginationText}>
+            {activeIndex + 1}/{items.length}
           </Text>
-        )}
-      </View>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  itemContainer: {
-    width: screenWidth * 0.8, // 80% of screen width
-    height: 200,
+  container: {
+    marginVertical: 10,
   },
-  paginationContainer: {
-    // Style your pagination container
-  },
-  paginationDot: {
-    // Style your active pagination dot
-  },
-  inactiveDot: {
-    // Style your inactive pagination dot
+  scrollContainer: {
+    alignItems: 'center',
   },
   cardOffer: {
-    // width: windowWidth * 0.8,
     backgroundColor: "red",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 10,
-    paddingLeft: 15,
-    paddingRight: 10,
+    paddingVertical: 15,
+    paddingLeft: 20,
+    paddingRight: 15,
     alignItems: "center",
+    marginHorizontal: 10,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  textContainer: {
+    flex: 1,
   },
   offerHeaderText: {
     fontSize: 20,
@@ -217,16 +196,15 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "normal",
+    marginTop: 2,
   },
   shopNowButton: {
     backgroundColor: "#FFFFFF",
-    paddingVertical: 5,
-    paddingHorizontal: 5,
-    borderRadius: 50,
-    width: screenWidth * 0.3,
-    marginVertical: 10,
-    marginTop: 25,
-    marginBottom: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 25,
+    alignSelf: 'flex-start',
+    marginVertical: 15,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -236,6 +214,11 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 2,
   },
+  shopNowText: {
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 12,
+  },
   tcText: {
     marginTop: 5,
     fontSize: 8,
@@ -243,17 +226,28 @@ const styles = StyleSheet.create({
   },
   offerImageContainer: {
     borderRadius: 10,
-    // borderWidth: 1,
-    // borderColor: "#000",
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 5,
+    marginLeft: 10,
   },
   offerImage: {
     height: widthPercentageToDP(20),
+    width: widthPercentageToDP(20),
     borderRadius: 5,
-    aspectRatio: 1.5,
-    marginRight: 15,
+  },
+  paginationContainer: {
+    alignItems: "center",
+    marginTop: 10,
+  },
+  paginationText: {
+    backgroundColor: "#656565",
+    color: "#FFFFFF",
+    textAlign: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 10,
+    fontSize: 12,
+    fontWeight: "500",
   },
 });
 

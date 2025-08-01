@@ -11,11 +11,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import  Header  from "../../components/address/AddressHeader";
+import Header from "../../components/address/AddressHeader";
 import { InputField } from "../../app/address/AddNewAddress";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { fetchAddress } from "../../components/address/fetchAddress";
-import { updateAddress } from "../../components/address/updateAddress";
+import { updateAddress as updateAddressAPI } from "../../components/address/updateAddress";
 import { useLocalSearchParams, router } from "expo-router";
 import Type from "../../components/address/type";
 
@@ -37,13 +37,32 @@ interface AddressInput {
   building?: string;
 }
 
+interface AddressType {
+  id: string;
+  type: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other';
+  name: string;
+  phone: string;
+  gps: {
+    lat: number;
+    lon: number;
+  };
+  houseNo: string;
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
+  building?: string;
+  isDefault?: boolean;
+}
+
 const EditAddress: React.FC = () => {
   const { addressId } = useLocalSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [authToken, setAuthToken] = useState<string>(""); // You'll need to get this from your auth system
 
   const [addressInput, setAddressInput] = useState<AddressInput>({
-    type: 'Other',
+    type: 'Home',
     name: "",
     phone: "",
     gps: {
@@ -104,29 +123,44 @@ const EditAddress: React.FC = () => {
   const fetchAddressDetails = async (addressId: string) => {
     try {
       setIsLoading(true);
-      const addressData = await fetchAddress(addressId);
       
-      if (addressData) {
-        const formattedAddress: AddressInput = {
-          type: addressData.type || 'Other',
-          name: addressData.name || "",
-          phone: addressData.phone || "",
-          gps: {
-            lat: addressData.gps?.lat || 0,
-            lon: addressData.gps?.lon || 0,
-          },
-          houseNo: addressData.houseNo || "",
-          street: addressData.street || "",
-          city: addressData.city || "",
-          state: addressData.state || "",
-          pincode: addressData.pincode || "",
-          building: addressData.building || "",
-        };
+      if (!authToken) {
+        Alert.alert("Error", "Authentication token is missing. Please login again.");
+        router.back();
+        return;
+      }
+
+      // Fetch all addresses and find the specific one
+      const addressesData = await fetchAddress(authToken);
+      
+      if (addressesData && Array.isArray(addressesData)) {
+        const foundAddress = addressesData.find((addr: AddressType) => addr.id === addressId);
         
-        setAddressInput(formattedAddress);
-        setOriginalAddress(formattedAddress);
+        if (foundAddress) {
+          const formattedAddress: AddressInput = {
+            type: foundAddress.type || 'Home',
+            name: foundAddress.name || "",
+            phone: foundAddress.phone || "",
+            gps: {
+              lat: foundAddress.gps?.lat || 0,
+              lon: foundAddress.gps?.lon || 0,
+            },
+            houseNo: foundAddress.houseNo || "",
+            street: foundAddress.street || "",
+            city: foundAddress.city || "",
+            state: foundAddress.state || "",
+            pincode: foundAddress.pincode || "",
+            building: foundAddress.building || "",
+          };
+          
+          setAddressInput(formattedAddress);
+          setOriginalAddress(formattedAddress);
+        } else {
+          Alert.alert("Error", "Address not found");
+          router.back();
+        }
       } else {
-        Alert.alert("Error", "Address not found");
+        Alert.alert("Error", "Failed to fetch address details");
         router.back();
       }
     } catch (error) {
@@ -139,15 +173,28 @@ const EditAddress: React.FC = () => {
   };
 
   useEffect(() => {
-    if (addressId) {
+    if (addressId && authToken) {
       fetchAddressDetails(addressId as string);
     }
-  }, [addressId]);
+  }, [addressId, authToken]);
+
+  // You'll need to set up auth token management
+  useEffect(() => {
+    const getAuthToken = async () => {
+      // TODO: Get the auth token from your authentication system
+      // const token = await AsyncStorage.getItem('authToken');
+      // setAuthToken(token || "");
+      
+      // For now, you'll need to set this up properly
+      setAuthToken("your-auth-token-here");
+    };
+    getAuthToken();
+  }, []);
 
   const validateInputs = (): boolean => {
     const errors: string[] = [];
 
-    if (!addressInput.type || addressInput.type === 'Other') {
+    if (!addressInput.type) {
       errors.push("Please select an address type");
     }
     if (!addressInput.name.trim()) {
@@ -185,7 +232,7 @@ const EditAddress: React.FC = () => {
     return JSON.stringify(addressInput) !== JSON.stringify(originalAddress);
   };
 
-  const updateAddress = async () => {
+  const handleUpdateAddress = async () => {
     if (!validateInputs()) return;
 
     if (!hasChanges()) {
@@ -193,10 +240,15 @@ const EditAddress: React.FC = () => {
       return;
     }
 
+    if (!authToken) {
+      Alert.alert("Error", "Authentication token is missing. Please login again.");
+      return;
+    }
+
     setIsSaving(true);
     try {
-      const result = await updateAddress(
-        addressId as string,
+      const result = await updateAddressAPI(
+        authToken,
         addressInput.type,
         addressInput.name,
         addressInput.phone,
@@ -209,7 +261,7 @@ const EditAddress: React.FC = () => {
         addressInput.building
       );
 
-      if (result.success) {
+      if (result) {
         Alert.alert("Success", "Address updated successfully!", [
           {
             text: "OK",
@@ -217,7 +269,7 @@ const EditAddress: React.FC = () => {
           },
         ]);
       } else {
-        Alert.alert("Error", result.error?.message || "Failed to update address");
+        Alert.alert("Error", "Failed to update address. Please try again.");
       }
     } catch (error) {
       console.error("Error updating address:", error);
@@ -228,9 +280,26 @@ const EditAddress: React.FC = () => {
   };
 
   const handleTypeChange = (value: string) => {
+    // Map the display name back to the API value
+    let apiValue: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other';
+    switch (value) {
+      case 'Friends & Family':
+        apiValue = 'FriendsAndFamily';
+        break;
+      case 'Home':
+        apiValue = 'Home';
+        break;
+      case 'Work':
+        apiValue = 'Work';
+        break;
+      default:
+        apiValue = 'Other';
+        break;
+    }
+    
     setAddressInput((prev) => ({
       ...prev,
-      type: value as 'Home' | 'Work' | 'FriendsAndFamily' | 'Other',
+      type: apiValue,
     }));
   };
 
@@ -270,16 +339,7 @@ const EditAddress: React.FC = () => {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View style={styles.headerContainer}>
-        <TouchableOpacity
-          onPress={handleCancel}
-          style={styles.backButton}
-        >
-          <MaterialCommunityIcons name="chevron-left" size={28} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Edit Address</Text>
-        <View style={{ width: 28 }} />
-      </View>
+      <Header title="Edit Address" />
 
       <ScrollView 
         keyboardShouldPersistTaps="always"
@@ -329,7 +389,7 @@ const EditAddress: React.FC = () => {
             <Text style={styles.sectionTitle}>
               Address Type <Text style={styles.required}>*</Text>
             </Text>
-            <Type saveAs={handleTypeChange} />
+            <Type saveAs={handleTypeChange} initialValue={addressInput.type} />
           </View>
 
           {/* Personal Details Section */}
@@ -409,7 +469,7 @@ const EditAddress: React.FC = () => {
 
             <TouchableOpacity 
               style={[styles.updateButton, isSaving && styles.updateButtonDisabled]} 
-              onPress={updateAddress}
+              onPress={handleUpdateAddress}
               disabled={isSaving}
             >
               {isSaving ? (
