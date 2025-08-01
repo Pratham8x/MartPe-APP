@@ -54,10 +54,11 @@ export default {
     },
     extra: {
       BACKEND_BASE_URL: process.env.BACKEND_BASE_URL,
+        GOOGLE_MAPS_API_KEY: "your-key-here",
       eas: {
         projectId:  "c08fe04a-5464-4863-ae3d-b9d61b4eefc4"
 
       }
     }
   }
-};
+}

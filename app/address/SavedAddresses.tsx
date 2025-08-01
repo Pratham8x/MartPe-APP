@@ -169,29 +169,29 @@ const SavedAddresses: React.FC = () => {
     );
   };
 
-  const handleMarkAsDefault = async (addressId: string) => {
-    try {
-      // First, unmark all other addresses as default
-      const updatedAddresses = addresses.map(addr => ({
-        ...addr,
-        isDefault: addr.id === addressId
-      }));
-      setAddresses(updatedAddresses);
+  // const handleMarkAsDefault = async (addressId: string) => {
+  //   try {
+  //     // First, unmark all other addresses as default
+  //     const updatedAddresses = addresses.map(addr => ({
+  //       ...addr,
+  //       isDefault: addr.id === addressId
+  //     }));
+  //     setAddresses(updatedAddresses);
 
-      // Update on server
-      const result = await updateAddress(authToken);
-      if (result) {
-        await fetchUserAddresses();
-      } else {
-        Alert.alert("Error", "Failed to mark address as default");
-        await fetchUserAddresses(); // Revert to server state
-      }
-    } catch (error) {
-      console.error("Error marking address as default:", error);
-      Alert.alert("Error", "Failed to mark address as default");
-      await fetchUserAddresses(); // Revert to server state
-    }
-  };
+  //     // Update on server
+  //     const result = await updateAddress(authToken);
+  //     if (result) {
+  //       await fetchUserAddresses();
+  //     } else {
+  //       Alert.alert("Error", "Failed to mark address as default");
+  //       await fetchUserAddresses(); // Revert to server state
+  //     }
+  //   } catch (error) {
+  //     console.error("Error marking address as default:", error);
+  //     Alert.alert("Error", "Failed to mark address as default");
+  //     await fetchUserAddresses(); // Revert to server state
+  //   }
+  // };
 
   const handleRetry = () => {
     if (authToken && isAuthenticated) {
@@ -273,7 +273,7 @@ const SavedAddresses: React.FC = () => {
                   isDefault={!!address.isDefault}
                   addressId={address.id}
                   onPress={handleDeleteAddress}
-                  markAsDefault={handleMarkAsDefault}
+                 // markAsDefault={handleMarkAsDefault}
                   pincode={address.pincode}
                   city={address.city}
                   state={address.state}
@@ -325,7 +325,7 @@ interface SavedAddressCard {
   city: string;
   pincode: string;
   onPress: (addressId: string) => void;
-  markAsDefault: (addressId: string) => void;
+  // markAsDefault: (addressId: string) => void;
   lat: number;
   lng: number;
   selectedDetails: any;
@@ -340,7 +340,7 @@ const SavedAddressCard: React.FC<SavedAddressCard> = (props) => {
     isDefault,
     addressId,
     onPress,
-    markAsDefault,
+    // markAsDefault,
     lat,
     lng,
     pincode,
@@ -441,7 +441,7 @@ const SavedAddressCard: React.FC<SavedAddressCard> = (props) => {
             <ShareButton type="address" address={fullAddress} />
           </TouchableOpacity>
           
-          {!isDefault && (
+          {/* {!isDefault && (
             <TouchableOpacity
               onPress={() => markAsDefault(addressId)}
               style={styles.defaultButton}
@@ -449,7 +449,7 @@ const SavedAddressCard: React.FC<SavedAddressCard> = (props) => {
               <MaterialCommunityIcons name="star-outline" size={16} color="#01884B" />
               <Text style={styles.defaultButtonText}>Set as default</Text>
             </TouchableOpacity>
-          )}
+          )} */}
         </View>
 
         {/* deliver here */}

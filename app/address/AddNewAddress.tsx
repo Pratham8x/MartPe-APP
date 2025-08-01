@@ -15,15 +15,16 @@ import Constants from "expo-constants";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
-import Header from '../../components/address/AddressHeader';
+import Header from "../../components/address/AddressHeader";
 import { createAddress } from "../../components/address/createAddress";
 import axios from "axios";
 import useUserDetails from "../../hook/useUserDetails";
 import { router } from "expo-router";
 import Type from "../../components/address/type";
+import { getAsyncStorageItem } from "../../utility/asyncStorage";
 
 interface AddressInput {
-  type: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other';
+  type: "Home" | "Work" | "FriendsAndFamily" | "Other";
   name: string;
   phone: string;
   gps: {
@@ -45,7 +46,7 @@ interface InputFieldProps {
   value: string;
   onChangeText: (value: string) => void;
   required?: boolean;
-  keyboardType?: 'default' | 'numeric' | 'phone-pad';
+  keyboardType?: "default" | "numeric" | "phone-pad";
   multiline?: boolean;
 }
 
@@ -53,10 +54,10 @@ const AddNewAddress: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { userDetails, getUserDetails } = useUserDetails();
-  const [authToken, setAuthToken] = useState<string>(""); // You'll need to get this from your auth system
+  const [authToken, setAuthToken] = useState<string>("");
 
   const [addressInput, setAddressInput] = useState<AddressInput>({
-    type: 'Home', // Changed default from 'Other' to 'Home'
+    type: "Home",
     name: "",
     phone: "",
     gps: {
@@ -75,18 +76,24 @@ const AddNewAddress: React.FC = () => {
 
   const [currentLocationLoading, setCurrentLocationLoading] = useState(false);
 
+  const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
+  console.log("MAPS_KEY:", MAPS_KEY);
+
   useEffect(() => {
-    getUserDetails().then(() => {
+    const loadInitialData = async () => {
+      const token = await getAsyncStorageItem("auth-token");
+      if (token) setAuthToken(token);
+      await getUserDetails();
       setIsLoading(false);
-      setAddressInput(prev => ({
+      setAddressInput((prev) => ({
         ...prev,
         phone: userDetails?.phoneNumber || "",
         name: userDetails?.firstName || "",
       }));
-    });
-  }, []);
+    };
 
-const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
+    loadInitialData();
+  }, []);
 
   const handleInputChange = (field: string, value: any) => {
     setAddressInput((prevInput) => ({
@@ -111,7 +118,7 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
     if (data && details) {
       const streetNumber = assignFromResponse("street_number", details);
       const route = assignFromResponse("route", details);
-      
+
       setAddressInput((prev) => ({
         ...prev,
         houseNo: streetNumber || "",
@@ -120,11 +127,13 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
           lat: details.geometry?.location?.lat || 0,
           lon: details.geometry?.location?.lng || 0,
         },
-        landmark: assignFromResponse("point_of_interest", details) || 
-                  assignFromResponse("establishment", details),
+        landmark:
+          assignFromResponse("point_of_interest", details) ||
+          assignFromResponse("establishment", details),
         state: assignFromResponse("administrative_area_level_1", details),
-        city: assignFromResponse("locality", details) || 
-              assignFromResponse("administrative_area_level_2", details),
+        city:
+          assignFromResponse("locality", details) ||
+          assignFromResponse("administrative_area_level_2", details),
         pincode: assignFromResponse("postal_code", details),
       }));
     }
@@ -133,26 +142,16 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
   const validateInputs = (): boolean => {
     const errors: string[] = [];
 
-    if (!addressInput.type) {
-      errors.push("Please select an address type");
-    }
-    if (!addressInput.name.trim()) {
-      errors.push("Name is required");
-    }
+    if (!addressInput.type) errors.push("Please select an address type");
+    if (!addressInput.name.trim()) errors.push("Name is required");
     if (!addressInput.phone.trim()) {
       errors.push("Phone number is required");
     } else if (!/^\d{10}$/.test(addressInput.phone)) {
       errors.push("Phone number must be 10 digits");
     }
-    if (!addressInput.street.trim()) {
-      errors.push("Street address is required");
-    }
-    if (!addressInput.city.trim()) {
-      errors.push("City is required");
-    }
-    if (!addressInput.state.trim()) {
-      errors.push("State is required");
-    }
+    if (!addressInput.street.trim()) errors.push("Street address is required");
+    if (!addressInput.city.trim()) errors.push("City is required");
+    if (!addressInput.state.trim()) errors.push("State is required");
     if (!addressInput.pincode.trim()) {
       errors.push("Pincode is required");
     } else if (!/^\d{6}$/.test(addressInput.pincode)) {
@@ -170,14 +169,17 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
     if (!validateInputs()) return;
 
     if (!authToken) {
-      Alert.alert("Error", "Authentication token is missing. Please login again.");
+      Alert.alert(
+        "Error",
+        "Authentication token is missing. Please login again."
+      );
       return;
     }
 
     setIsSaving(true);
     try {
       const result = await createAddress(
-        authToken, // Added authToken as first parameter
+        authToken,
         addressInput.type,
         addressInput.name,
         addressInput.phone,
@@ -192,10 +194,7 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
 
       if (result) {
         Alert.alert("Success", "Address added successfully!", [
-          {
-            text: "OK",
-            onPress: () => router.back(),
-          },
+          { text: "OK", onPress: () => router.back() },
         ]);
       } else {
         Alert.alert("Error", "Failed to add address. Please try again.");
@@ -213,7 +212,10 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission Denied", "Location permission is required to use current location");
+        Alert.alert(
+          "Permission Denied",
+          "Location permission is required to use current location"
+        );
         return;
       }
 
@@ -237,7 +239,7 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
     try {
       const response = await axios.get(url);
       const addressData = response?.data?.items?.[0]?.address;
-      
+
       if (addressData) {
         setAddressInput((prev) => ({
           ...prev,
@@ -247,36 +249,32 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
           state: addressData.state || "",
           pincode: addressData.postalCode || "",
           landmark: addressData.district || "",
-          gps: {
-            lat: latitude,
-            lon: longitude,
-          },
+          gps: { lat: latitude, lon: longitude },
         }));
       }
     } catch (error) {
-      console.error("Error during geocoding with HERE API:", error);
+      console.error("Error during geocoding:", error);
       Alert.alert("Error", "Failed to get address from location");
     }
   };
 
   const handleTypeChange = (value: string) => {
-    // Map the display name back to the API value
-    let apiValue: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other';
+    let apiValue: "Home" | "Work" | "FriendsAndFamily" | "Other";
     switch (value) {
-      case 'Friends & Family':
-        apiValue = 'FriendsAndFamily';
+      case "Friends & Family":
+        apiValue = "FriendsAndFamily";
         break;
-      case 'Home':
-        apiValue = 'Home';
+      case "Home":
+        apiValue = "Home";
         break;
-      case 'Work':
-        apiValue = 'Work';
+      case "Work":
+        apiValue = "Work";
         break;
       default:
-        apiValue = 'Other';
+        apiValue = "Other";
         break;
     }
-    
+
     setAddressInput((prev) => ({
       ...prev,
       type: apiValue,
@@ -298,64 +296,47 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <Header title="Add New Address" />
-      <ScrollView 
+      <ScrollView
         keyboardShouldPersistTaps="always"
         contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
       >
         <View style={styles.contentContainer}>
-          {/* Address Search Section */}
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Search Address</Text>
-            <GooglePlacesAutocomplete
-              styles={{ 
-                textInput: styles.searchInput,
-                listView: styles.searchResults,
-                row: styles.searchResultRow,
-                description: styles.searchResultText,
-              }}
-              placeholder="Search for street, area, locality..."
-              fetchDetails={true}
-              onPress={(data, details) => {
-                autoCompleteAddress(data, details);
-              }}
-              query={{
-                key: MAPS_KEY,
-                language: "en",
-                components: "country:in",
-              }}
-              listEmptyComponent={
-                <View style={styles.noResultsContainer}>
-                  <MaterialCommunityIcons name="map-search" size={40} color="#ccc" />
-                  <Text style={styles.noResultsText}>No results found</Text>
-                </View>
-              }
-              renderLeftButton={() => (
-                <MaterialCommunityIcons 
-                  name="magnify" 
-                  size={20} 
-                  color="#666" 
-                  style={styles.searchIcon} 
-                />
-              )}
-            />
-            
-            <TouchableOpacity
-              onPress={getLocation}
-              style={styles.currentLocationButton}
-              disabled={currentLocationLoading}
-            >
-              {currentLocationLoading ? (
-                <ActivityIndicator size="small" color="#01884B" />
-              ) : (
-                <MaterialCommunityIcons name="crosshairs-gps" size={20} color="#01884B" />
-              )}
-              <Text style={styles.currentLocationText}>
-                {currentLocationLoading ? "Getting location..." : "Use current location"}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Search Address</Text>
+
+              <InputField
+                placeholder="Street / Locality / Area"
+                value={addressInput.street}
+                onChangeText={(value) => handleInputChange("street", value)}
+                required
+              />
+
+              <TouchableOpacity
+                onPress={getLocation}
+                style={styles.currentLocationButton}
+                disabled={currentLocationLoading}
+              >
+                {currentLocationLoading ? (
+                  <ActivityIndicator size="small" color="#01884B" />
+                ) : (
+                  <MaterialCommunityIcons
+                    name="crosshairs-gps"
+                    size={20}
+                    color="#01884B"
+                  />
+                )}
+                <Text style={styles.currentLocationText}>
+                  {currentLocationLoading
+                    ? "Getting location..."
+                    : "Use current location"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
+          {/* You can leave the rest of your file unchanged below */}
           {/* Divider */}
           <View style={styles.dividerContainer}>
             <View style={styles.dividerLine} />
@@ -447,15 +428,19 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
           </View>
 
           {/* Save Button */}
-          <TouchableOpacity 
-            style={[styles.saveButton, isSaving && styles.saveButtonDisabled]} 
+          <TouchableOpacity
+            style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
             onPress={handleAddAddress}
             disabled={isSaving}
           >
             {isSaving ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <MaterialCommunityIcons name="content-save" size={20} color="#fff" />
+              <MaterialCommunityIcons
+                name="content-save"
+                size={20}
+                color="#fff"
+              />
             )}
             <Text style={styles.saveButtonText}>
               {isSaving ? "Saving..." : "Save Address"}
@@ -466,13 +451,12 @@ const MAPS_KEY = Constants.expoConfig?.extra?.GOOGLE_MAPS_API_KEY;
     </KeyboardAvoidingView>
   );
 };
-
 export const InputField: React.FC<InputFieldProps> = ({
   placeholder,
   value,
   onChangeText,
   required = false,
-  keyboardType = 'default',
+  keyboardType = "default",
   multiline = false,
 }) => {
   return (
