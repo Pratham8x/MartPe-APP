@@ -1,12 +1,11 @@
-
-// updateAddress.ts
+// Fixed updateAddress.ts
 import Constants from 'expo-constants';
 
 const BASE_URL = Constants.expoConfig?.extra?.BACKEND_BASE_URL;
 
 export const updateAddress = async (
   authToken: string,
-  // addressId: string,
+  addressId: string, // This was missing and commented out!
   type?: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other',
   name?: string,
   phone?: string,
@@ -24,6 +23,7 @@ export const updateAddress = async (
       {
         method: 'PUT',
         body: JSON.stringify({
+          addressId, // This is crucial - your backend needs this!
           type,
           name,
           phone,
@@ -44,13 +44,15 @@ export const updateAddress = async (
     );
 
     if (!response.ok) {
-      console.log('update address failed');
-      throw new Error();
+      console.log('update address failed', response.status);
+      const errorText = await response.text();
+      console.log('Update error response:', errorText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
     return await response.json();
   } catch (error) {
     console.log('Update address error', error);
-     return null;
+    throw error; // Re-throw instead of returning null for better error handling
   }
 };

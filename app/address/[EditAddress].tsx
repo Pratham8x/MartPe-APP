@@ -14,18 +14,19 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Header from "../../components/address/AddressHeader";
 import { InputField } from "../../app/address/AddNewAddress";
 import { fetchAddress } from "../../components/address/fetchAddress";
-import { updateAddress as updateAddressAPI } from "../../components/address/updateAddress"; // Fixed import path
-import { deleteAddress as deleteAddressAPI } from "../../components/address/deleteAddress"; // Fixed import path
+import { updateAddress } from "../../components/address/updateAddress";
+import { deleteAddress } from "../../components/address/deleteAddress";
 import { useLocalSearchParams, router } from "expo-router";
 import Type from "../../components/address/type";
 import useUserDetails from '../../hook/useUserDetails';
 
+
 interface AddressType {
   _id: string;
-  type: string,
+  type: 'Home' | 'Work' | 'FriendsAndFamily' | 'Other';
   name: string;
   phone: string;
-  gps: { lat: number; lon: number };
+  gps: { lat: number; lon: number; point?: { type: string; coordinates: number[] } };
   houseNo: string;
   street: string;
   city: string;
@@ -34,7 +35,6 @@ interface AddressType {
   building?: string;
 }
 
-// Define the AddressInput type used in the component
 type AddressInput = Omit<AddressType, '_id'>;
 
 const EditAddress: React.FC = () => {
@@ -87,18 +87,18 @@ const EditAddress: React.FC = () => {
         return router.back();
       }
 
-      const { type, name, phone, gps, houseNo, street, city, state, pincode, building } = found;
-      const formatted: AddressInput = { 
-        type, 
-        name, 
-        phone, 
-        gps, 
-        houseNo, 
-        street, 
-        city, 
-        state, 
-        pincode, 
-        building: building || "" 
+      const { _id, ...rest } = found;
+      const formatted: AddressInput = {
+        type: rest.type as 'Home' | 'Work' | 'FriendsAndFamily' | 'Other',
+        name: rest.name,
+        phone: rest.phone,
+        gps: rest.gps,
+        houseNo: rest.houseNo,
+        street: rest.street,
+        city: rest.city,
+        state: rest.state,
+        pincode: rest.pincode,
+        building: rest.building || ""
       };
       
       setAddressInput(formatted);
@@ -152,7 +152,6 @@ const EditAddress: React.FC = () => {
   const hasChanges = (): boolean => {
     if (!originalAddress) return true;
     
-    // Compare only the relevant fields, excluding GPS which might have floating point precision issues
     const fieldsToCompare: (keyof AddressInput)[] = [
       'type', 'name', 'phone', 'houseNo', 'street', 'city', 'state', 'pincode', 'building'
     ];
@@ -162,93 +161,134 @@ const EditAddress: React.FC = () => {
     );
   };
 
-// In your EditAddress component
-
-const handleUpdateAddress = async () => {
-  if (!validateInputs()) return;
-  if (!hasChanges()) {
-    Alert.alert("No Changes", "No changes were made to update.");
-    return;
-  }
-
-  setIsSaving(true);
-  try {
-    const result = await updateAddressAPI(
-      authToken,
-      addressId as string,
-      addressInput.type,
-      addressInput.name,
-      addressInput.phone,
-      addressInput.gps,
-      addressInput.houseNo,
-      addressInput.street,
-      addressInput.city,
-      addressInput.state,
-      addressInput.pincode,
-     // addressInput.building
-    );
-
-    if (result) {
-      Alert.alert("Success", "Address updated successfully!", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+  const handleUpdateAddress = async () => {
+    if (!validateInputs()) return;
+    if (!hasChanges()) {
+      Alert.alert("No Changes", "No changes were made to update.");
+      return;
     }
-  } catch (e: any) {
-    console.error("Update error:", e);
-    Alert.alert(
-      "Update Failed", 
-      e.message || "Failed to update address. Please try again."
-    );
-  } finally {
-    setIsSaving(false);
-  }
-};
 
-const handleDeleteAddress = async () => {
-  Alert.alert(
-    "Delete Address", 
-    "Are you sure you want to delete this address?", 
-    [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          setIsDeleting(true);
-          try {
-            const result = await deleteAddressAPI(authToken, addressId as string);
-            if (result) {
-              Alert.alert("Success", "Address deleted successfully!", [
-                { text: "OK", onPress: () => router.back() },
-              ]);
+    if (!addressId) {
+      Alert.alert("Error", "Address ID is missing.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await updateAddress(
+        authToken,
+        addressId as string,
+        addressInput.type,
+        addressInput.name,
+        addressInput.phone,
+        addressInput.gps,
+        addressInput.houseNo,
+        addressInput.street,
+        addressInput.city,
+        addressInput.state,
+        addressInput.pincode,
+        addressInput.building
+      );
+      
+      if (result) {
+        Alert.alert("Success", "Address updated successfully!", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      } else {
+        Alert.alert("Error", "Failed to update address. Please try again.");
+      }
+    } catch (e: any) {
+      console.error("Update error:", e);
+      Alert.alert(
+        "Update Failed", 
+        e.message || "Failed to update address. Please try again.",
+        [
+          { text: "OK" }
+        ]
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAddress = async () => {
+    Alert.alert(
+      "Delete Address", 
+      "Are you sure you want to delete this address?", 
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            if (!addressId) {
+              Alert.alert("Error", "Address ID is missing.");
+              return;
             }
-          } catch (e: any) {
-            console.error("Delete error:", e);
-            Alert.alert(
-              "Delete Failed", 
-              e.message || "Failed to delete address. Please try again."
-            );
-          } finally {
-            setIsDeleting(false);
-          }
+
+            setIsDeleting(true);
+            try {
+              const result = await deleteAddress(authToken, addressId as string);
+              
+              if (result) {
+                Alert.alert("Success", "Address deleted successfully!", [
+                  { text: "OK", onPress: () => router.back() },
+                ]);
+              } else {
+                Alert.alert("Error", "Failed to delete address. Please try again.");
+              }
+            } catch (e: any) {
+              console.error("Delete error:", e);
+              Alert.alert(
+                "Delete Failed", 
+                e.message || "Failed to delete address. Please try again.",
+                [
+                  { text: "OK" }
+                ]
+              );
+            } finally {
+              setIsDeleting(false);
+            }
+          },
         },
-      },
-    ]
-  );
-};
+      ]
+    );
+  };
 
   const handleTypeChange = (value: string) => {
-    let apiValue: AddressInput["type"] = "Other";
-    if (value === "Home") apiValue = "Home";
-    else if (value === "Work") apiValue = "Work";
-    else if (value === "Friends & Family") apiValue = "FriendsAndFamily";
+    let apiValue: AddressInput["type"];
+    
+    switch (value) {
+      case "Home":
+        apiValue = "Home";
+        break;
+      case "Work":
+        apiValue = "Work";
+        break;
+      case "Friends & Family":
+        apiValue = "FriendsAndFamily";
+        break;
+      case "Other":
+      default:
+        apiValue = "Other";
+        break;
+    }
+    
     setAddressInput((prev) => ({ ...prev, type: apiValue }));
   };
 
-
-  const getDisplayType = (type: AddressInput["type"]) => {
-    if (type === "FriendsAndFamily") return "Friends & Family";
-    return type;
+  const getDisplayType = (type: AddressInput["type"]): string => {
+    switch (type) {
+      case "FriendsAndFamily":
+        return "Friends & Family";
+      case "Home":
+        return "Home";
+      case "Work":
+        return "Work";
+      case "Other":
+      default:
+        return "Other";
+    }
   };
 
   if (authLoading || isLoading) {
@@ -273,7 +313,10 @@ const handleDeleteAddress = async () => {
         <View style={styles.contentContainer}>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Address Type</Text>
-            <Type saveAs={handleTypeChange} />
+            <Type 
+              saveAs={handleTypeChange} 
+             // initialValue={getDisplayType(addressInput.type)}
+            />
           </View>
 
           <View style={styles.sectionContainer}>

@@ -5,7 +5,8 @@ import Constants from 'expo-constants';
 
 const BASE_URL = Constants.expoConfig?.extra?.BACKEND_BASE_URL;
 
-export const deleteAddress = async (authToken: string) => {
+// Fixed deleteAddress.ts
+export const deleteAddress = async (authToken: string, addressId: string) => {
   try {
     const response = await fetch(
       `${BASE_URL}/users/address`,
@@ -15,18 +16,23 @@ export const deleteAddress = async (authToken: string) => {
           Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json'
         },
+        body: JSON.stringify({
+          addressId // This was completely missing!
+        }),
         cache: 'no-cache'
       }
     );
 
     if (!response.ok) {
-      console.log('delete address failed');
-      throw new Error();
+      console.log('delete address failed', response.status);
+      const errorText = await response.text();
+      console.log('Delete error response:', errorText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
     return await response.json();
   } catch (error) {
     console.log('Delete address error', error);
-    return null;
+    throw error; // Re-throw instead of returning null for better error handling
   }
 };
